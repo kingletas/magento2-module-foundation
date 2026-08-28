@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * The three pieces a signed link is built from, composed.
  */
-final class IssuedLinkTest extends TestCase
+class IssuedLinkTest extends TestCase
 {
     private TokenGenerator $tokens;
     private CacheKeyBuilder $keys;
@@ -43,8 +43,8 @@ final class IssuedLinkTest extends TestCase
         $token = $this->tokens->generate();
         $stored = $this->tokens->hash($token);
 
-        self::assertNotSame($token, $stored, 'The token itself must never be what is stored.');
-        self::assertTrue($this->tokens->matches($token, $stored));
+        $this->assertNotSame($token, $stored, 'The token itself must never be what is stored.');
+        $this->assertTrue($this->tokens->matches($token, $stored));
     }
 
     /**
@@ -58,9 +58,9 @@ final class IssuedLinkTest extends TestCase
 
         $altered = $token[0] === 'a' ? 'b' . substr($token, 1) : 'a' . substr($token, 1);
 
-        self::assertFalse($this->tokens->matches($altered, $stored));
-        self::assertFalse($this->tokens->matches(substr($token, 0, -4), $stored));
-        self::assertFalse($this->tokens->matches('', $stored));
+        $this->assertFalse($this->tokens->matches($altered, $stored));
+        $this->assertFalse($this->tokens->matches(substr($token, 0, -4), $stored));
+        $this->assertFalse($this->tokens->matches('', $stored));
     }
 
     /**
@@ -69,7 +69,7 @@ final class IssuedLinkTest extends TestCase
      */
     public function testATokenIsNeverShorterThanTheFloor(): void
     {
-        self::assertSame(TokenGenerator::MIN_BYTES * 2, strlen($this->tokens->generate(4)));
+        $this->assertSame(TokenGenerator::MIN_BYTES * 2, strlen($this->tokens->generate(4)));
     }
 
     /**
@@ -82,11 +82,11 @@ final class IssuedLinkTest extends TestCase
 
         $this->cache->save('the rendered cart', $key, $this->keys->getTags(), $this->keys->getLifetime());
 
-        self::assertSame('the rendered cart', $this->cache->load($this->keys->build(1, 'CART-TOKEN-1')));
+        $this->assertSame('the rendered cart', $this->cache->load($this->keys->build(1, 'CART-TOKEN-1')));
 
         $this->cache->clean($this->keys->getTags());
 
-        self::assertFalse($this->cache->load($key), 'Cleaning the tag should have dropped the entry.');
+        $this->assertFalse($this->cache->load($key), 'Cleaning the tag should have dropped the entry.');
     }
 
     /**
@@ -99,9 +99,9 @@ final class IssuedLinkTest extends TestCase
         $this->cache->save('store one, second cart', $this->keys->build(1, 'CART-TOKEN-2'), [], null);
         $this->cache->save('store two, first cart', $this->keys->build(2, 'CART-TOKEN-1'), [], null);
 
-        self::assertSame('store one, first cart', $this->cache->load($this->keys->build(1, 'CART-TOKEN-1')));
-        self::assertSame('store one, second cart', $this->cache->load($this->keys->build(1, 'CART-TOKEN-2')));
-        self::assertSame('store two, first cart', $this->cache->load($this->keys->build(2, 'CART-TOKEN-1')));
+        $this->assertSame('store one, first cart', $this->cache->load($this->keys->build(1, 'CART-TOKEN-1')));
+        $this->assertSame('store one, second cart', $this->cache->load($this->keys->build(1, 'CART-TOKEN-2')));
+        $this->assertSame('store two, first cart', $this->cache->load($this->keys->build(2, 'CART-TOKEN-1')));
     }
 
     /**
@@ -112,7 +112,7 @@ final class IssuedLinkTest extends TestCase
     {
         $this->resolveInTheController('CART-TOKEN-1');
 
-        self::assertSame('CART-TOKEN-1', $this->renderInTheBlock());
+        $this->assertSame('CART-TOKEN-1', $this->renderInTheBlock());
     }
 
     /**
@@ -125,10 +125,10 @@ final class IssuedLinkTest extends TestCase
 
         // Graceful: the second writer stands down, and the first value stands.
         $this->registry->set('shared_cart_token', 'CART-TOKEN-2', true);
-        self::assertSame('CART-TOKEN-1', $this->registry->get('shared_cart_token'));
+        $this->assertSame('CART-TOKEN-1', $this->registry->get('shared_cart_token'));
 
         $this->registry->replace('shared_cart_token', 'CART-TOKEN-2');
-        self::assertSame('CART-TOKEN-2', $this->registry->get('shared_cart_token'));
+        $this->assertSame('CART-TOKEN-2', $this->registry->get('shared_cart_token'));
     }
 
     private function resolveInTheController(string $token): void

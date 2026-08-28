@@ -41,7 +41,7 @@ class ProductImageUrlResolverTest extends TestCase
 
     public function testAProductResolvesToItsHelperUrl(): void
     {
-        self::assertSame(
+        $this->assertSame(
             'https://cdn.test/media/large.jpg',
             $this->resolver()->resolveByProduct($this->product())
         );
@@ -51,7 +51,7 @@ class ProductImageUrlResolverTest extends TestCase
     {
         $product = $this->product();
         $this->imageHelper = $this->createMock(ImageHelper::class);
-        $this->imageHelper->expects(self::once())
+        $this->imageHelper->expects($this->once())
             ->method('init')
             ->with($product, ProductImageUrlResolverInterface::IMAGE_THUMBNAIL, ['width' => 90])
             ->willReturnSelf();
@@ -59,7 +59,7 @@ class ProductImageUrlResolverTest extends TestCase
         $this->imageHelperFactory = $this->createMock(ImageHelperFactory::class);
         $this->imageHelperFactory->method('create')->willReturn($this->imageHelper);
 
-        self::assertSame(
+        $this->assertSame(
             'https://cdn.test/media/thumb.jpg',
             $this->resolver()->resolveByProduct(
                 $product,
@@ -72,9 +72,9 @@ class ProductImageUrlResolverTest extends TestCase
     public function testTheDefaultImageTypeIsTheLargeOne(): void
     {
         $this->imageHelper = $this->createMock(ImageHelper::class);
-        $this->imageHelper->expects(self::once())
+        $this->imageHelper->expects($this->once())
             ->method('init')
-            ->with(self::anything(), ProductImageUrlResolverInterface::IMAGE_LARGE, [])
+            ->with($this->anything(), ProductImageUrlResolverInterface::IMAGE_LARGE, [])
             ->willReturnSelf();
         $this->imageHelper->method('getUrl')->willReturn('https://cdn.test/media/large.jpg');
         $this->imageHelperFactory = $this->createMock(ImageHelperFactory::class);
@@ -85,12 +85,12 @@ class ProductImageUrlResolverTest extends TestCase
 
     public function testASkuIsLoadedThroughTheRepository(): void
     {
-        $this->productRepository->expects(self::once())
+        $this->productRepository->expects($this->once())
             ->method('get')
             ->with('SKU-1')
             ->willReturn($this->product());
 
-        self::assertSame('https://cdn.test/media/large.jpg', $this->resolver()->resolveBySku('SKU-1'));
+        $this->assertSame('https://cdn.test/media/large.jpg', $this->resolver()->resolveBySku('SKU-1'));
     }
 
     /**
@@ -99,7 +99,7 @@ class ProductImageUrlResolverTest extends TestCase
      */
     public function testARepeatedSkuIsLoadedOnlyOnce(): void
     {
-        $this->productRepository->expects(self::once())->method('get')->willReturn($this->product());
+        $this->productRepository->expects($this->once())->method('get')->willReturn($this->product());
 
         $resolver = $this->resolver();
         $resolver->resolveBySku('SKU-1');
@@ -113,14 +113,14 @@ class ProductImageUrlResolverTest extends TestCase
      */
     public function testARepeatedlyMissingSkuIsLookedUpOnlyOnce(): void
     {
-        $this->productRepository->expects(self::once())
+        $this->productRepository->expects($this->once())
             ->method('get')
             ->willThrowException(new NoSuchEntityException(__('No such entity.')));
 
         $resolver = $this->resolver();
 
-        self::assertNull($resolver->resolveBySku('GONE'));
-        self::assertNull($resolver->resolveBySku('GONE'));
+        $this->assertNull($resolver->resolveBySku('GONE'));
+        $this->assertNull($resolver->resolveBySku('GONE'));
     }
 
     /**
@@ -131,12 +131,12 @@ class ProductImageUrlResolverTest extends TestCase
         $this->productRepository->method('get')
             ->willThrowException(new NoSuchEntityException(__('No such entity.')));
 
-        self::assertNull($this->resolver()->resolveBySku('GONE'));
+        $this->assertNull($this->resolver()->resolveBySku('GONE'));
     }
 
     public function testDifferentSkusAreCachedSeparately(): void
     {
-        $this->productRepository->expects(self::exactly(2))->method('get')->willReturn($this->product());
+        $this->productRepository->expects($this->exactly(2))->method('get')->willReturn($this->product());
 
         $resolver = $this->resolver();
         $resolver->resolveBySku('SKU-1');
@@ -146,7 +146,7 @@ class ProductImageUrlResolverTest extends TestCase
     public function testAFileResolvesThroughTheHelpersImageFile(): void
     {
         $this->imageHelper = $this->createMock(ImageHelper::class);
-        $this->imageHelper->expects(self::once())
+        $this->imageHelper->expects($this->once())
             ->method('setImageFile')
             ->with('/m/y/my-image.jpg')
             ->willReturnSelf();
@@ -154,7 +154,7 @@ class ProductImageUrlResolverTest extends TestCase
         $this->imageHelperFactory = $this->createMock(ImageHelperFactory::class);
         $this->imageHelperFactory->method('create')->willReturn($this->imageHelper);
 
-        self::assertSame(
+        $this->assertSame(
             'https://cdn.test/media/my-image.jpg',
             $this->resolver()->resolveByFile('/m/y/my-image.jpg')
         );
@@ -167,10 +167,10 @@ class ProductImageUrlResolverTest extends TestCase
     public function testABlankFileIsRejectedWithoutTouchingTheHelper(): void
     {
         $this->imageHelperFactory = $this->createMock(ImageHelperFactory::class);
-        $this->imageHelperFactory->expects(self::never())->method('create');
+        $this->imageHelperFactory->expects($this->never())->method('create');
 
-        self::assertNull($this->resolver()->resolveByFile(''));
-        self::assertNull($this->resolver()->resolveByFile('   '));
+        $this->assertNull($this->resolver()->resolveByFile(''));
+        $this->assertNull($this->resolver()->resolveByFile('   '));
     }
 
     /**
@@ -188,8 +188,8 @@ class ProductImageUrlResolverTest extends TestCase
 
         $resolver = $this->resolver();
 
-        self::assertNull($resolver->resolveByProduct($this->product()));
-        self::assertNull($resolver->resolveByFile('/m/y/my-image.jpg'));
+        $this->assertNull($resolver->resolveByProduct($this->product()));
+        $this->assertNull($resolver->resolveByFile('/m/y/my-image.jpg'));
     }
 
     public function testAnEmptyHelperUrlIsNull(): void
@@ -200,7 +200,7 @@ class ProductImageUrlResolverTest extends TestCase
         $this->imageHelperFactory = $this->createMock(ImageHelperFactory::class);
         $this->imageHelperFactory->method('create')->willReturn($this->imageHelper);
 
-        self::assertNull($this->resolver()->resolveByProduct($this->product()));
+        $this->assertNull($this->resolver()->resolveByProduct($this->product()));
     }
 
     /**
@@ -216,7 +216,7 @@ class ProductImageUrlResolverTest extends TestCase
         $this->imageHelperFactory = $this->createMock(ImageHelperFactory::class);
         $this->imageHelperFactory->method('create')->willReturn($this->imageHelper);
 
-        self::assertSame(
+        $this->assertSame(
             'https://cdn.test/media/catalog/product/p/l/placeholder-tee.jpg',
             $this->resolver()->resolveByProduct($this->product())
         );

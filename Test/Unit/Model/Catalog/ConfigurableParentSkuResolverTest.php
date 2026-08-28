@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
  * Three things are being pinned down here, and none of them is "it returns a
  * parent SKU".
  */
-final class ConfigurableParentSkuResolverTest extends TestCase
+class ConfigurableParentSkuResolverTest extends TestCase
 {
     private AdapterInterface&MockObject $connection;
     private ResourceConnection&MockObject $resourceConnection;
@@ -65,14 +65,14 @@ final class ConfigurableParentSkuResolverTest extends TestCase
     {
         $this->rows = [['child_sku' => 'SHIRT-M', 'parent_sku' => 'SHIRT']];
 
-        self::assertSame('SHIRT', $this->resolver()->resolve('SHIRT-M'));
+        $this->assertSame('SHIRT', $this->resolver()->resolve('SHIRT-M'));
     }
 
     public function testAChildWithNoParentResolvesToNull(): void
     {
         $this->rows = [];
 
-        self::assertNull($this->resolver()->resolve('STANDALONE'));
+        $this->assertNull($this->resolver()->resolve('STANDALONE'));
     }
 
     /**
@@ -88,8 +88,8 @@ final class ConfigurableParentSkuResolverTest extends TestCase
 
         $resolved = $this->resolver()->resolveMany(['A-1', 'B-1', 'C-1', 'D-1']);
 
-        self::assertSame(1, $this->queries);
-        self::assertSame(['A-1' => 'A', 'B-1' => 'B', 'C-1' => 'C'], $resolved);
+        $this->assertSame(1, $this->queries);
+        $this->assertSame(['A-1' => 'A', 'B-1' => 'B', 'C-1' => 'C'], $resolved);
     }
 
     public function testTheSecondCallForTheSameSkuCostsNoQuery(): void
@@ -100,7 +100,7 @@ final class ConfigurableParentSkuResolverTest extends TestCase
         $resolver->resolve('SHIRT-M');
         $resolver->resolve('SHIRT-M');
 
-        self::assertSame(1, $this->queries);
+        $this->assertSame(1, $this->queries);
     }
 
     /**
@@ -115,7 +115,7 @@ final class ConfigurableParentSkuResolverTest extends TestCase
         $resolver->resolve('STANDALONE');
         $resolver->resolve('STANDALONE');
 
-        self::assertSame(1, $this->queries);
+        $this->assertSame(1, $this->queries);
     }
 
     public function testANegativeIsWrittenToTheSharedCacheAsAnEmptyString(): void
@@ -124,7 +124,7 @@ final class ConfigurableParentSkuResolverTest extends TestCase
 
         $this->resolver()->resolve('STANDALONE');
 
-        self::assertSame([['identifier' => 'key:STANDALONE', 'data' => '']], $this->cache->saves);
+        $this->assertSame([['identifier' => 'key:STANDALONE', 'data' => '']], $this->cache->saves);
     }
 
     /**
@@ -135,16 +135,16 @@ final class ConfigurableParentSkuResolverTest extends TestCase
     {
         $this->cache->entries['key:STANDALONE'] = '';
 
-        self::assertNull($this->resolver()->resolve('STANDALONE'));
-        self::assertSame(0, $this->queries);
+        $this->assertNull($this->resolver()->resolve('STANDALONE'));
+        $this->assertSame(0, $this->queries);
     }
 
     public function testACachedParentIsReadBackWithoutQuerying(): void
     {
         $this->cache->entries['key:SHIRT-M'] = 'SHIRT';
 
-        self::assertSame('SHIRT', $this->resolver()->resolve('SHIRT-M'));
-        self::assertSame(0, $this->queries);
+        $this->assertSame('SHIRT', $this->resolver()->resolve('SHIRT-M'));
+        $this->assertSame(0, $this->queries);
     }
 
     /**
@@ -157,8 +157,8 @@ final class ConfigurableParentSkuResolverTest extends TestCase
 
         $resolved = $this->resolver()->resolveMany(['A-1', 'B-1']);
 
-        self::assertSame(1, $this->queries);
-        self::assertSame(['A-1' => 'A', 'B-1' => 'B'], $resolved);
+        $this->assertSame(1, $this->queries);
+        $this->assertSame(['A-1' => 'A', 'B-1' => 'B'], $resolved);
     }
 
     public function testTheJoinUsesEntityIdOnOpenSource(): void
@@ -168,7 +168,7 @@ final class ConfigurableParentSkuResolverTest extends TestCase
 
         $this->resolver()->resolve('SHIRT-M');
 
-        self::assertContains('parent.`entity_id` = link.parent_id', $this->joinConditions);
+        $this->assertContains('parent.`entity_id` = link.parent_id', $this->joinConditions);
     }
 
     /**
@@ -181,8 +181,8 @@ final class ConfigurableParentSkuResolverTest extends TestCase
 
         $this->resolver()->resolve('SHIRT-M');
 
-        self::assertContains('parent.`row_id` = link.parent_id', $this->joinConditions);
-        self::assertNotContains('parent.`entity_id` = link.parent_id', $this->joinConditions);
+        $this->assertContains('parent.`row_id` = link.parent_id', $this->joinConditions);
+        $this->assertNotContains('parent.`entity_id` = link.parent_id', $this->joinConditions);
     }
 
     /**
@@ -196,19 +196,19 @@ final class ConfigurableParentSkuResolverTest extends TestCase
             ['child_sku' => 'SHIRT-M', 'parent_sku' => 'SHIRT-CLASSIC'],
         ];
 
-        self::assertSame('SHIRT-CLASSIC', $this->resolver()->resolve('SHIRT-M'));
+        $this->assertSame('SHIRT-CLASSIC', $this->resolver()->resolve('SHIRT-M'));
 
         // The same rows the other way round must give the same answer.
         $this->rows = array_reverse($this->rows);
         $this->cache = new ArrayCache();
 
-        self::assertSame('SHIRT-CLASSIC', $this->resolver()->resolve('SHIRT-M'));
+        $this->assertSame('SHIRT-CLASSIC', $this->resolver()->resolve('SHIRT-M'));
     }
 
     public function testAnEmptyBatchCostsNothing(): void
     {
-        self::assertSame([], $this->resolver()->resolveMany([]));
-        self::assertSame(0, $this->queries);
+        $this->assertSame([], $this->resolver()->resolveMany([]));
+        $this->assertSame(0, $this->queries);
     }
 
     public function testBlankAndDuplicateSkusAreDroppedBeforeQuerying(): void
@@ -217,8 +217,8 @@ final class ConfigurableParentSkuResolverTest extends TestCase
 
         $resolved = $this->resolver()->resolveMany(['A-1', 'A-1', '']);
 
-        self::assertSame(1, $this->queries);
-        self::assertSame(['A-1' => 'A'], $resolved);
+        $this->assertSame(1, $this->queries);
+        $this->assertSame(['A-1' => 'A'], $resolved);
     }
 
     private function resolver(): ConfigurableParentSkuResolver
@@ -229,7 +229,7 @@ final class ConfigurableParentSkuResolverTest extends TestCase
         $metadataPool = $this->createMock(MetadataPool::class);
         $metadataPool->method('getMetadata')
             ->willReturnCallback(function (string $entity) use ($metadata): EntityMetadataInterface {
-                self::assertSame(ProductInterface::class, $entity);
+                $this->assertSame(ProductInterface::class, $entity);
 
                 return $metadata;
             });

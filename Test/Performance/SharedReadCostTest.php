@@ -29,7 +29,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * What the shared pieces cost the modules built on them.
  */
-final class SharedReadCostTest extends TestCase
+class SharedReadCostTest extends TestCase
 {
     use BudgetAssertions;
 
@@ -52,7 +52,7 @@ final class SharedReadCostTest extends TestCase
      */
     public function testResolvingParentSkusCostsTheSameWhateverTheBatchSize(): void
     {
-        self::assertConstantCost(
+        $this->assertConstantCost(
             'queries while resolving configurable parents',
             function (int $skus): int {
                 $this->queries = 0;
@@ -80,7 +80,7 @@ final class SharedReadCostTest extends TestCase
 
         $resolver->resolveMany($skus);
 
-        self::assertCostAtMost('a repeated resolution', $afterFirst, $this->queries);
+        $this->assertCostAtMost('a repeated resolution', $afterFirst, $this->queries);
     }
 
     /**
@@ -96,7 +96,7 @@ final class SharedReadCostTest extends TestCase
 
         $resolver->resolve('STANDALONE-SKU');
 
-        self::assertCostAtMost('re-asking about a SKU with no parent', $afterFirst, $this->queries);
+        $this->assertCostAtMost('re-asking about a SKU with no parent', $afterFirst, $this->queries);
     }
 
     /**
@@ -121,7 +121,7 @@ final class SharedReadCostTest extends TestCase
         $config->getFloat('general/ratio');
         $config->getList('general/recipients');
 
-        self::assertCostAtMost('six typed reads', 6, $scopeConfig->reads(), $scopeConfig->summary());
+        $this->assertCostAtMost('six typed reads', 6, $scopeConfig->reads(), $scopeConfig->summary());
     }
 
     /**
@@ -137,7 +137,7 @@ final class SharedReadCostTest extends TestCase
         $config->getString('general/name', 'fallback');
         $config->getList('general/recipients');
 
-        self::assertCostAtMost('three reads that all fall back', 3, $scopeConfig->reads(), $scopeConfig->summary());
+        $this->assertCostAtMost('three reads that all fall back', 3, $scopeConfig->reads(), $scopeConfig->summary());
     }
 
     /**
@@ -163,7 +163,7 @@ final class SharedReadCostTest extends TestCase
             $keys->build(1, $i, 'TOKEN-' . $i, true, null);
         }
 
-        self::assertSame(
+        $this->assertSame(
             0,
             $serializations,
             'A key built from scalars should be a join, not a serialization.'
@@ -185,7 +185,7 @@ final class SharedReadCostTest extends TestCase
 
         (new CacheKeyBuilder($serializer, 'commerce_example'))->build(1, ['a', 'b', 'c'], 'TOKEN');
 
-        self::assertSame(1, $serializations);
+        $this->assertSame(1, $serializations);
     }
 
     private function resolver(): ConfigurableParentSkuResolver

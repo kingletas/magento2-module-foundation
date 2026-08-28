@@ -25,11 +25,11 @@ trait ModuleFiles
      *
      * @return string[]
      */
-    private static function sourceFiles(string $moduleDir): array
+    private function sourceFiles(string $moduleDir): array
     {
         $files = [];
 
-        foreach (self::phpFiles($moduleDir) as $file) {
+        foreach ($this->phpFiles($moduleDir) as $file) {
             if (!str_contains($file, '/Test/')) {
                 $files[] = $file;
             }
@@ -41,7 +41,7 @@ trait ModuleFiles
     /**
      * @return string[]
      */
-    private static function phpFiles(string $moduleDir): array
+    private function phpFiles(string $moduleDir): array
     {
         $files = [];
 
@@ -67,9 +67,9 @@ trait ModuleFiles
      *
      * @return string[]
      */
-    private static function diFiles(string $moduleDir): array
+    private function diFiles(string $moduleDir): array
     {
-        return self::etcFiles($moduleDir, 'di.xml');
+        return $this->etcFiles($moduleDir, 'di.xml');
     }
 
     /**
@@ -78,7 +78,7 @@ trait ModuleFiles
      *
      * @return string[]
      */
-    private static function etcFiles(string $moduleDir, string $fileName): array
+    private function etcFiles(string $moduleDir, string $fileName): array
     {
         $files = [];
         $etc = $moduleDir . '/etc';
@@ -107,7 +107,7 @@ trait ModuleFiles
      *
      * @return string[]
      */
-    private static function allEtcXml(string $moduleDir): array
+    private function allEtcXml(string $moduleDir): array
     {
         $files = [];
         $etc = $moduleDir . '/etc';
@@ -132,7 +132,7 @@ trait ModuleFiles
     /**
      * Parse one XML file, or null when it will not parse at all.
      */
-    private static function loadXml(string $file): ?SimpleXMLElement
+    private function loadXml(string $file): ?SimpleXMLElement
     {
         $previous = libxml_use_internal_errors(true);
         $xml = simplexml_load_file($file);
@@ -147,14 +147,14 @@ trait ModuleFiles
      *
      * @return SimpleXMLElement[]
      */
-    private static function descendants(SimpleXMLElement $element): array
+    private function descendants(SimpleXMLElement $element): array
     {
         $found = [];
 
         foreach ($element->children() as $child) {
             $found[] = $child;
 
-            foreach (self::descendants($child) as $descendant) {
+            foreach ($this->descendants($child) as $descendant) {
                 $found[] = $descendant;
             }
         }
@@ -167,12 +167,12 @@ trait ModuleFiles
      *
      * @return array<string, string> Virtual type name => the type it extends.
      */
-    private static function virtualTypes(string $moduleDir): array
+    private function virtualTypes(string $moduleDir): array
     {
         $virtualTypes = [];
 
-        foreach (self::diFiles($moduleDir) as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->diFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -191,7 +191,7 @@ trait ModuleFiles
      *
      * @return array{0: string, 1: string} Namespace prefix, absolute directory.
      */
-    private static function psr4(string $moduleDir): array
+    private function psr4(string $moduleDir): array
     {
         $manifest = $moduleDir . '/composer.json';
 
@@ -212,9 +212,9 @@ trait ModuleFiles
      * The file a class name would live in, or null when it is outside this
      * module's namespace and therefore somebody else's to provide.
      */
-    private static function fileForClass(string $moduleDir, string $class): ?string
+    private function fileForClass(string $moduleDir, string $class): ?string
     {
-        [$prefix, $dir] = self::psr4($moduleDir);
+        [$prefix, $dir] = $this->psr4($moduleDir);
         $class = ltrim($class, '\\');
 
         if ($prefix === '' || !str_starts_with($class . '\\', $prefix)) {
@@ -228,10 +228,10 @@ trait ModuleFiles
      * Whether the module can supply this name: a file of its own, a virtualType
      * it declares, or a class the autoloader already knows about.
      */
-    private static function isResolvableName(string $moduleDir, string $name): bool
+    private function isResolvableName(string $moduleDir, string $name): bool
     {
         $name = ltrim($name, '\\');
-        $virtualTypes = self::virtualTypes($moduleDir);
+        $virtualTypes = $this->virtualTypes($moduleDir);
 
         if (isset($virtualTypes[$name])) {
             return true;
@@ -239,11 +239,11 @@ trait ModuleFiles
 
         foreach (['\\Proxy', '\\Interceptor', '\\Factory'] as $generated) {
             if (str_ends_with($name, $generated)) {
-                return self::isResolvableName($moduleDir, substr($name, 0, -strlen($generated)));
+                return $this->isResolvableName($moduleDir, substr($name, 0, -strlen($generated)));
             }
         }
 
-        $file = self::fileForClass($moduleDir, $name);
+        $file = $this->fileForClass($moduleDir, $name);
 
         if ($file !== null) {
             return is_file($file);
@@ -255,10 +255,10 @@ trait ModuleFiles
     /**
      * The module name in `etc/module.xml`, e.g. "Commerce_ShareCart".
      */
-    private static function moduleName(string $moduleDir): string
+    private function moduleName(string $moduleDir): string
     {
         $xml = is_file($moduleDir . '/etc/module.xml')
-            ? self::loadXml($moduleDir . '/etc/module.xml')
+            ? $this->loadXml($moduleDir . '/etc/module.xml')
             : null;
 
         return $xml === null ? '' : (string) ($xml->module['name'] ?? '');
@@ -267,10 +267,10 @@ trait ModuleFiles
     /**
      * The `<argument name="section">` given to this module's config reader.
      */
-    private static function configSection(string $moduleDir): string
+    private function configSection(string $moduleDir): string
     {
-        foreach (self::diFiles($moduleDir) as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->diFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;

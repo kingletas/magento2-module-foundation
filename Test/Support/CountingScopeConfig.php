@@ -17,7 +17,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
  *
  * @see BudgetAssertions
  */
-final class CountingScopeConfig implements ScopeConfigInterface
+class CountingScopeConfig implements ScopeConfigInterface
 {
     /** @var array<int, array{path: string, scope: string, code: string}> */
     private array $reads = [];

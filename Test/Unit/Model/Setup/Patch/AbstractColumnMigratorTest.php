@@ -71,11 +71,11 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator(['chunkSize' => 50])->apply();
 
-        self::assertCount(2, $this->queries);
-        self::assertSame([1, 51], $this->queries[0]['bind']);
-        self::assertSame([51, 101], $this->queries[1]['bind']);
-        self::assertStringContainsString('UPDATE', $this->queries[0]['sql']);
-        self::assertStringContainsString('INNER JOIN', $this->queries[0]['sql']);
+        $this->assertCount(2, $this->queries);
+        $this->assertSame([1, 51], $this->queries[0]['bind']);
+        $this->assertSame([51, 101], $this->queries[1]['bind']);
+        $this->assertStringContainsString('UPDATE', $this->queries[0]['sql']);
+        $this->assertStringContainsString('INNER JOIN', $this->queries[0]['sql']);
     }
 
     /**
@@ -88,9 +88,9 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator(['chunkSize' => 50])->apply();
 
-        self::assertStringContainsString('>= ? AND', $this->queries[0]['sql']);
-        self::assertStringContainsString('< ?', $this->queries[0]['sql']);
-        self::assertSame($this->queries[0]['bind'][1], $this->queries[1]['bind'][0]);
+        $this->assertStringContainsString('>= ? AND', $this->queries[0]['sql']);
+        $this->assertStringContainsString('< ?', $this->queries[0]['sql']);
+        $this->assertSame($this->queries[0]['bind'][1], $this->queries[1]['bind'][0]);
     }
 
     /**
@@ -100,8 +100,8 @@ class AbstractColumnMigratorTest extends TestCase
     {
         $this->migrator()->apply();
 
-        self::assertStringContainsString('SET t.`featured_colour` = s.`legacy_colour`', $this->queries[0]['sql']);
-        self::assertSame([1, 50001], $this->queries[0]['bind']);
+        $this->assertStringContainsString('SET t.`featured_colour` = s.`legacy_colour`', $this->queries[0]['sql']);
+        $this->assertSame([1, 50001], $this->queries[0]['bind']);
     }
 
     public function testTheTargetColumnDefaultsToTheSourceColumnName(): void
@@ -110,15 +110,15 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator(['sourceColumn' => 'colour', 'targetColumn' => null])->apply();
 
-        self::assertStringContainsString('SET t.`colour` = s.`colour`', $this->queries[0]['sql']);
+        $this->assertStringContainsString('SET t.`colour` = s.`colour`', $this->queries[0]['sql']);
     }
 
     public function testTheTableNamesGoThroughTheResourceSoThePrefixIsApplied(): void
     {
         $this->migrator()->apply();
 
-        self::assertStringContainsString('`pfx_target`', $this->queries[0]['sql']);
-        self::assertStringContainsString('`pfx_source`', $this->queries[0]['sql']);
+        $this->assertStringContainsString('`pfx_target`', $this->queries[0]['sql']);
+        $this->assertStringContainsString('`pfx_source`', $this->queries[0]['sql']);
     }
 
     public function testTheJoinUsesTheConfiguredPrimaryKey(): void
@@ -127,7 +127,7 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator(['primaryKey' => 'row_id'])->apply();
 
-        self::assertStringContainsString('ON t.`row_id` = s.`row_id`', $this->queries[0]['sql']);
+        $this->assertStringContainsString('ON t.`row_id` = s.`row_id`', $this->queries[0]['sql']);
     }
 
     /**
@@ -142,7 +142,7 @@ class AbstractColumnMigratorTest extends TestCase
         $this->existingColumns = ['pfx_target.featured_colour' => true];
         $this->migrator()->apply();
 
-        self::assertSame([], $this->queries);
+        $this->assertSame([], $this->queries);
     }
 
     public function testAnEmptySourceTableIsANoOp(): void
@@ -151,7 +151,7 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator()->apply();
 
-        self::assertSame([], $this->queries);
+        $this->assertSame([], $this->queries);
     }
 
     /**
@@ -163,8 +163,8 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator(['chunkSize' => 50])->apply();
 
-        self::assertCount(1, $this->queries);
-        self::assertSame([0, 50], $this->queries[0]['bind']);
+        $this->assertCount(1, $this->queries);
+        $this->assertSame([0, 50], $this->queries[0]['bind']);
     }
 
     public function testASingleRowStillGetsAStatement(): void
@@ -173,8 +173,8 @@ class AbstractColumnMigratorTest extends TestCase
 
         $this->migrator(['chunkSize' => 50])->apply();
 
-        self::assertCount(1, $this->queries);
-        self::assertSame([7, 57], $this->queries[0]['bind']);
+        $this->assertCount(1, $this->queries);
+        $this->assertSame([7, 57], $this->queries[0]['bind']);
     }
 
     /**
@@ -195,16 +195,16 @@ class AbstractColumnMigratorTest extends TestCase
     {
         $this->connection = $this->failingConnection();
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())
+        $logger->expects($this->once())
             ->method('critical')
             ->with(
-                self::stringContains('source.legacy_colour to target.featured_colour'),
-                self::callback(static fn (array $context): bool => $context['exception'] instanceof RuntimeException)
+                $this->stringContains('source.legacy_colour to target.featured_colour'),
+                $this->callback(static fn (array $context): bool => $context['exception'] instanceof RuntimeException)
             );
 
         try {
             $this->migrator([], $logger)->apply();
-            self::fail('Expected the failure to propagate.');
+            $this->fail('Expected the failure to propagate.');
         } catch (RuntimeException) {
             // Expected; the assertion under test is the log call.
         }
@@ -214,19 +214,19 @@ class AbstractColumnMigratorTest extends TestCase
     {
         $migrator = $this->migrator();
 
-        self::assertSame($migrator, $migrator->apply());
+        $this->assertSame($migrator, $migrator->apply());
     }
 
     public function testThePatchDeclaresNoDependenciesOrAliasesOfItsOwn(): void
     {
-        self::assertSame([], CopyColumnMigrator::getDependencies());
-        self::assertSame([], $this->migrator()->getAliases());
+        $this->assertSame([], CopyColumnMigrator::getDependencies());
+        $this->assertSame([], $this->migrator()->getAliases());
     }
 
     public function testTheDefaultChunkSizeIsBounded(): void
     {
-        self::assertGreaterThan(0, AbstractColumnMigrator::DEFAULT_CHUNK_SIZE);
-        self::assertLessThanOrEqual(100000, AbstractColumnMigrator::DEFAULT_CHUNK_SIZE);
+        $this->assertGreaterThan(0, AbstractColumnMigrator::DEFAULT_CHUNK_SIZE);
+        $this->assertLessThanOrEqual(100000, AbstractColumnMigrator::DEFAULT_CHUNK_SIZE);
     }
 
     private function failingConnection(): AdapterInterface&MockObject

@@ -35,14 +35,14 @@ class RedirectButtonTest extends TestCase
         $data = $this->button(['label' => 'Back', 'htmlClass' => 'action-primary', 'sortOrder' => 5])
             ->getButtonData();
 
-        self::assertSame('Back', $data['label']);
-        self::assertSame('action-primary', $data['class']);
-        self::assertSame(5, $data['sort_order']);
+        $this->assertSame('Back', $data['label']);
+        $this->assertSame('action-primary', $data['class']);
+        $this->assertSame(5, $data['sort_order']);
     }
 
     public function testTheRouteIsAssembledFromItsThreeParts(): void
     {
-        $this->urlBuilder->expects(self::once())
+        $this->urlBuilder->expects($this->once())
             ->method('getUrl')
             ->with('commerce_share/cart/index', [])
             ->willReturn('https://admin.test/commerce_share/cart/');
@@ -57,7 +57,7 @@ class RedirectButtonTest extends TestCase
      */
     public function testTheCurrentRouteWildcardsAreForwardedUnchanged(): void
     {
-        $this->urlBuilder->expects(self::once())
+        $this->urlBuilder->expects($this->once())
             ->method('getUrl')
             ->with('*/*/index', [])
             ->willReturn('https://admin.test/here/');
@@ -68,7 +68,7 @@ class RedirectButtonTest extends TestCase
     public function testTheConfiguredRequestParameterIsForwarded(): void
     {
         $this->request->method('getParam')->with('id')->willReturn('42');
-        $this->urlBuilder->expects(self::once())
+        $this->urlBuilder->expects($this->once())
             ->method('getUrl')
             ->with('*/*/edit', ['id' => '42'])
             ->willReturn('https://admin.test/edit/id/42/');
@@ -83,7 +83,7 @@ class RedirectButtonTest extends TestCase
     public function testTheParameterCanBeForwardedUnderADifferentName(): void
     {
         $this->request->method('getParam')->with('alert_id')->willReturn('7');
-        $this->urlBuilder->expects(self::once())
+        $this->urlBuilder->expects($this->once())
             ->method('getUrl')
             ->with('*/*/edit', ['id' => '7'])
             ->willReturn('https://admin.test/edit/id/7/');
@@ -99,7 +99,7 @@ class RedirectButtonTest extends TestCase
     public function testAnAbsentOrEmptyParameterIsOmittedEntirely(): void
     {
         $this->request->method('getParam')->willReturn(null);
-        $this->urlBuilder->expects(self::exactly(2))
+        $this->urlBuilder->expects($this->exactly(2))
             ->method('getUrl')
             ->with('*/*/index', [])
             ->willReturn('https://admin.test/here/');
@@ -115,7 +115,7 @@ class RedirectButtonTest extends TestCase
     {
         $this->urlBuilder->method('getUrl')->willReturn('https://admin.test/grid/');
 
-        self::assertSame(
+        $this->assertSame(
             'window.location.href = "https:\/\/admin.test\/grid\/";',
             $this->button([])->getButtonData()['on_click']
         );
@@ -131,9 +131,9 @@ class RedirectButtonTest extends TestCase
 
         $onClick = $this->button(['paramKey' => 'id'])->getButtonData()['on_click'];
 
-        self::assertStringNotContainsString('";alert(1);"', $onClick);
-        self::assertStringContainsString('\\"', $onClick);
-        self::assertSame(
+        $this->assertStringNotContainsString('";alert(1);"', $onClick);
+        $this->assertStringContainsString('\\"', $onClick);
+        $this->assertSame(
             'window.location.href = ' . (new Json())->serialize($hostile) . ';',
             $onClick
         );
@@ -148,7 +148,7 @@ class RedirectButtonTest extends TestCase
 
         $onClick = $this->button([])->getButtonData()['on_click'];
 
-        self::assertStringEndsWith('\\\\";', $onClick);
+        $this->assertStringEndsWith('\\\\";', $onClick);
     }
 
     /**
@@ -160,7 +160,7 @@ class RedirectButtonTest extends TestCase
 
         $onClick = $this->button([])->getButtonData()['on_click'];
 
-        self::assertStringNotContainsString('</script>', $onClick);
+        $this->assertStringNotContainsString('</script>', $onClick);
     }
 
     /**

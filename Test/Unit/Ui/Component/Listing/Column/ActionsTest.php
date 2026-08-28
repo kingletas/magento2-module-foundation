@@ -48,11 +48,11 @@ class ActionsTest extends TestCase
 
         $actions = $this->firstItem($column, [['entity_id' => 42]])['actions'];
 
-        self::assertSame(['view', 'edit', 'delete'], array_keys($actions));
-        self::assertSame('https://admin.test/commerce/alert/view/entity_id=42', $actions['view']['href']);
-        self::assertSame('https://admin.test/commerce/alert/edit/entity_id=42', $actions['edit']['href']);
-        self::assertSame('View', (string) $actions['view']['label']);
-        self::assertFalse($actions['view']['hidden']);
+        $this->assertSame(['view', 'edit', 'delete'], array_keys($actions));
+        $this->assertSame('https://admin.test/commerce/alert/view/entity_id=42', $actions['view']['href']);
+        $this->assertSame('https://admin.test/commerce/alert/edit/entity_id=42', $actions['edit']['href']);
+        $this->assertSame('View', (string) $actions['view']['label']);
+        $this->assertFalse($actions['view']['hidden']);
     }
 
     /**
@@ -63,7 +63,7 @@ class ActionsTest extends TestCase
     {
         $column = $this->column(['viewUrlPath' => 'commerce/alert/view']);
 
-        self::assertSame(['view'], array_keys($this->firstItem($column, [['entity_id' => 42]])['actions']));
+        $this->assertSame(['view'], array_keys($this->firstItem($column, [['entity_id' => 42]])['actions']));
     }
 
     /**
@@ -74,7 +74,7 @@ class ActionsTest extends TestCase
     {
         $item = $this->firstItem($this->column([]), [['entity_id' => 42]]);
 
-        self::assertSame(['entity_id' => 42], $item);
+        $this->assertSame(['entity_id' => 42], $item);
     }
 
     public function testTheIdFieldDefaultsToEntityIdAndIsConfigurable(): void
@@ -83,7 +83,7 @@ class ActionsTest extends TestCase
 
         $actions = $this->firstItem($column, [['alert_id' => 7]])['actions'];
 
-        self::assertSame('https://admin.test/commerce/alert/view/alert_id=7', $actions['view']['href']);
+        $this->assertSame('https://admin.test/commerce/alert/view/alert_id=7', $actions['view']['href']);
     }
 
     /**
@@ -96,7 +96,7 @@ class ActionsTest extends TestCase
 
         $actions = $this->firstItem($column, [['alert_id' => 7]])['actions'];
 
-        self::assertSame('https://admin.test/commerce/alert/view/alert_id=7', $actions['view']['href']);
+        $this->assertSame('https://admin.test/commerce/alert/view/alert_id=7', $actions['view']['href']);
     }
 
     /**
@@ -113,7 +113,7 @@ class ActionsTest extends TestCase
 
         $actions = $this->firstItem($column, [['alert_id' => 7]])['actions'];
 
-        self::assertSame('https://admin.test/commerce/alert/view/id=7', $actions['view']['href']);
+        $this->assertSame('https://admin.test/commerce/alert/view/id=7', $actions['view']['href']);
     }
 
     /**
@@ -126,8 +126,8 @@ class ActionsTest extends TestCase
 
         $items = $this->prepare($column, [['other' => 1], ['entity_id' => 42]])['data']['items'];
 
-        self::assertSame(['other' => 1], $items[0]);
-        self::assertArrayHasKey('actions', $items[1]);
+        $this->assertSame(['other' => 1], $items[0]);
+        $this->assertArrayHasKey('actions', $items[1]);
     }
 
     /**
@@ -140,9 +140,9 @@ class ActionsTest extends TestCase
 
         $delete = $this->firstItem($column, [['entity_id' => 42]])['actions']['delete'];
 
-        self::assertArrayHasKey('confirm', $delete);
-        self::assertStringContainsString('42', (string) $delete['confirm']['message']);
-        self::assertStringContainsString('cannot be undone', (string) $delete['confirm']['message']);
+        $this->assertArrayHasKey('confirm', $delete);
+        $this->assertStringContainsString('42', (string) $delete['confirm']['message']);
+        $this->assertStringContainsString('cannot be undone', (string) $delete['confirm']['message']);
     }
 
     /**
@@ -154,15 +154,15 @@ class ActionsTest extends TestCase
 
         $delete = $this->firstItem($column, [['entity_id' => '<img src=x onerror=alert(1)>']])['actions']['delete'];
 
-        self::assertStringNotContainsString('<img', (string) $delete['confirm']['message']);
+        $this->assertStringNotContainsString('<img', (string) $delete['confirm']['message']);
     }
 
     public function testADataSourceWithoutItemsIsReturnedUnchanged(): void
     {
         $column = $this->column(['viewUrlPath' => 'commerce/alert/view']);
 
-        self::assertSame([], $column->prepareDataSource([]));
-        self::assertSame(
+        $this->assertSame([], $column->prepareDataSource([]));
+        $this->assertSame(
             ['data' => ['items' => 'not-an-array']],
             $column->prepareDataSource(['data' => ['items' => 'not-an-array']])
         );

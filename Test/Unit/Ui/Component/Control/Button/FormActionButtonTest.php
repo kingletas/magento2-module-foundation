@@ -19,11 +19,11 @@ class FormActionButtonTest extends TestCase
     {
         $data = (new FormActionButton('Save Thread Colour'))->getButtonData();
 
-        self::assertSame('Save Thread Colour', $data['label']);
-        self::assertSame('action-secondary', $data['class']);
-        self::assertSame('save', $data['data_attribute']['form-role']);
-        self::assertSame(['button' => ['event' => 'save']], $data['data_attribute']['mage-init']);
-        self::assertSame(10, $data['sort_order']);
+        $this->assertSame('Save Thread Colour', $data['label']);
+        $this->assertSame('action-secondary', $data['class']);
+        $this->assertSame('save', $data['data_attribute']['form-role']);
+        $this->assertSame(['button' => ['event' => 'save']], $data['data_attribute']['mage-init']);
+        $this->assertSame(10, $data['sort_order']);
     }
 
     /**
@@ -40,14 +40,14 @@ class FormActionButtonTest extends TestCase
             80
         ))->getButtonData();
 
-        self::assertSame('Save and Continue', $data['label']);
-        self::assertSame('action-primary save', $data['class']);
-        self::assertSame('saveAndContinue', $data['data_attribute']['form-role']);
-        self::assertSame(
+        $this->assertSame('Save and Continue', $data['label']);
+        $this->assertSame('action-primary save', $data['class']);
+        $this->assertSame('saveAndContinue', $data['data_attribute']['form-role']);
+        $this->assertSame(
             ['button' => ['event' => 'saveAndContinueEdit']],
             $data['data_attribute']['mage-init']
         );
-        self::assertSame(80, $data['sort_order']);
+        $this->assertSame(80, $data['sort_order']);
     }
 
     /**
@@ -63,7 +63,7 @@ class FormActionButtonTest extends TestCase
             ['button' => ['target' => '#edit_form']]
         ))->getButtonData();
 
-        self::assertSame(
+        $this->assertSame(
             ['button' => ['event' => 'save', 'target' => '#edit_form']],
             $data['data_attribute']['mage-init']
         );
@@ -75,7 +75,7 @@ class FormActionButtonTest extends TestCase
      */
     public function testOnClickIsEmptySoTheFormKeepsControlOfSubmission(): void
     {
-        self::assertSame('', (new FormActionButton('Save'))->getButtonData()['on_click']);
+        $this->assertSame('', (new FormActionButton('Save'))->getButtonData()['on_click']);
     }
 
     /**
@@ -86,6 +86,6 @@ class FormActionButtonTest extends TestCase
     {
         $button = new FormActionButton('Save', 'action-primary', 'save', ['button' => ['target' => '#f']]);
 
-        self::assertSame($button->getButtonData(), $button->getButtonData());
+        $this->assertSame($button->getButtonData(), $button->getButtonData());
     }
 }

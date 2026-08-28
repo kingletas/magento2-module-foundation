@@ -22,7 +22,7 @@ abstract class ModuleWiringTestCase extends TestCase
     /**
      * The module root - the directory holding `composer.json` and `etc/`.
      */
-    abstract protected static function moduleDir(): string;
+    abstract protected function moduleDir(): string;
 
     /**
      * Config paths that appear in `system.xml` with no `config.xml` default on
@@ -30,58 +30,58 @@ abstract class ModuleWiringTestCase extends TestCase
      *
      * @return string[]
      */
-    protected static function settingsWithNoDefault(): array
+    protected function settingsWithNoDefault(): array
     {
         return [];
     }
 
     public function testEveryConfigFileParses(): void
     {
-        self::assertEveryConfigFileParses(static::moduleDir());
+        $this->assertEveryConfigFileParses($this->moduleDir());
     }
 
     public function testEveryObserverNamesSomethingThatCanBeBuilt(): void
     {
-        self::assertEveryObserverExists(static::moduleDir());
+        $this->assertEveryObserverExists($this->moduleDir());
     }
 
     public function testEveryCronJobNamesAMethodThatExists(): void
     {
-        self::assertEveryCronJobIsCallable(static::moduleDir());
+        $this->assertEveryCronJobIsCallable($this->moduleDir());
     }
 
     public function testConsumersTopicsAndQueuesAgree(): void
     {
-        self::assertMessageQueueWiringAgrees(static::moduleDir());
+        $this->assertMessageQueueWiringAgrees($this->moduleDir());
     }
 
     public function testTheConfigAclResourceHangsFromTheCoreChain(): void
     {
-        self::assertAclConfigResourceUsesTheCoreChain(static::moduleDir());
+        $this->assertAclConfigResourceUsesTheCoreChain($this->moduleDir());
     }
 
     public function testEveryAdminControllerRequiresLogin(): void
     {
-        self::assertEveryAdminControllerRequiresLogin(static::moduleDir());
+        $this->assertEveryAdminControllerRequiresLogin($this->moduleDir());
     }
 
     public function testGridDataSourcesAreDeclaredGlobally(): void
     {
-        self::assertGridDataSourcesAreDeclaredGlobally(static::moduleDir());
+        $this->assertGridDataSourcesAreDeclaredGlobally($this->moduleDir());
     }
 
     public function testEveryConsoleCommandTakesItsNameFromDi(): void
     {
-        self::assertEveryCommandIsNamedInDi(static::moduleDir());
+        $this->assertEveryCommandIsNamedInDi($this->moduleDir());
     }
 
     public function testEveryWebApiRouteIsServiceable(): void
     {
-        self::assertEveryWebApiRouteIsServiceable(static::moduleDir());
+        $this->assertEveryWebApiRouteIsServiceable($this->moduleDir());
     }
 
     public function testEverySettingHasADefault(): void
     {
-        self::assertEverySettingHasADefault(static::moduleDir(), static::settingsWithNoDefault());
+        $this->assertEverySettingHasADefault($this->moduleDir(), $this->settingsWithNoDefault());
     }
 }

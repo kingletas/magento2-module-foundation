@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Most of this class is one line of ordering, and that line is the whole point.
  */
-final class SearchResultBuilderTest extends TestCase
+class SearchResultBuilderTest extends TestCase
 {
     public function testTheCriteriaGoesThroughTheCoreCollectionProcessor(): void
     {
@@ -26,7 +26,7 @@ final class SearchResultBuilderTest extends TestCase
         $collection = $this->collection();
         $processor = $this->createMock(CollectionProcessorInterface::class);
 
-        $processor->expects(self::once())
+        $processor->expects($this->once())
             ->method('process')
             ->with($criteria, $collection);
 
@@ -41,9 +41,9 @@ final class SearchResultBuilderTest extends TestCase
 
         $results = $this->builder()->build($criteria, $collection);
 
-        self::assertSame($criteria, $results->getSearchCriteria());
-        self::assertSame(57, $results->getTotalCount());
-        self::assertSame($items, $results->getItems());
+        $this->assertSame($criteria, $results->getSearchCriteria());
+        $this->assertSame(57, $results->getTotalCount());
+        $this->assertSame($items, $results->getItems());
     }
 
     /**
@@ -57,7 +57,7 @@ final class SearchResultBuilderTest extends TestCase
 
         $this->builder()->build($this->createMock(SearchCriteriaInterface::class), $collection);
 
-        self::assertSame(['getSize', 'getItems'], $collection->calls);
+        $this->assertSame(['getSize', 'getItems'], $collection->calls);
     }
 
     /**
@@ -71,8 +71,8 @@ final class SearchResultBuilderTest extends TestCase
             $this->collection(size: 0, items: [])
         );
 
-        self::assertSame(0, $results->getTotalCount());
-        self::assertSame([], $results->getItems());
+        $this->assertSame(0, $results->getTotalCount());
+        $this->assertSame([], $results->getItems());
     }
 
     private function builder(?CollectionProcessorInterface $processor = null): SearchResultBuilder

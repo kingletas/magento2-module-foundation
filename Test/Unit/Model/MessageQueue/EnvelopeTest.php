@@ -27,12 +27,12 @@ class EnvelopeTest extends TestCase
     {
         $envelope = $this->envelope()->setData(['sku' => 'SKU-1', 'qty' => 3]);
 
-        self::assertSame('{"sku":"SKU-1","qty":3}', $envelope->getBody());
+        $this->assertSame('{"sku":"SKU-1","qty":3}', $envelope->getBody());
     }
 
     public function testAnEmptyEnvelopeStillProducesAValidBody(): void
     {
-        self::assertSame('[]', $this->envelope()->getBody());
+        $this->assertSame('[]', $this->envelope()->getBody());
     }
 
     /**
@@ -42,10 +42,10 @@ class EnvelopeTest extends TestCase
     {
         $envelope = $this->envelope()->set('tags', []);
 
-        self::assertNull($envelope->get('absent'));
-        self::assertSame([], $envelope->get('tags'));
-        self::assertTrue($envelope->has('tags'));
-        self::assertFalse($envelope->has('absent'));
+        $this->assertNull($envelope->get('absent'));
+        $this->assertSame([], $envelope->get('tags'));
+        $this->assertTrue($envelope->has('tags'));
+        $this->assertFalse($envelope->has('absent'));
     }
 
     /**
@@ -56,38 +56,38 @@ class EnvelopeTest extends TestCase
     {
         $envelope = $this->envelope()->set('store_id', null);
 
-        self::assertTrue($envelope->has('store_id'));
-        self::assertNull($envelope->get('store_id', 'fallback'));
+        $this->assertTrue($envelope->has('store_id'));
+        $this->assertNull($envelope->get('store_id', 'fallback'));
     }
 
     public function testTheSuppliedDefaultIsReturnedForAMissingKey(): void
     {
-        self::assertSame(7, $this->envelope()->get('attempts', 7));
+        $this->assertSame(7, $this->envelope()->get('attempts', 7));
     }
 
     public function testSetOverwritesAndAllReturnsEverything(): void
     {
         $envelope = $this->envelope()->setData(['a' => 1])->set('b', 2)->set('a', 9);
 
-        self::assertSame(['a' => 9, 'b' => 2], $envelope->all());
+        $this->assertSame(['a' => 9, 'b' => 2], $envelope->all());
     }
 
     public function testTheFluentSettersReturnTheSameEnvelope(): void
     {
         $envelope = $this->envelope();
 
-        self::assertSame($envelope, $envelope->set('a', 1));
-        self::assertSame($envelope, $envelope->setData([]));
-        self::assertSame($envelope, $envelope->reset());
-        self::assertSame($envelope, $envelope->populate('{"a":1}'));
+        $this->assertSame($envelope, $envelope->set('a', 1));
+        $this->assertSame($envelope, $envelope->setData([]));
+        $this->assertSame($envelope, $envelope->reset());
+        $this->assertSame($envelope, $envelope->populate('{"a":1}'));
     }
 
     public function testResetEmptiesTheEnvelope(): void
     {
         $envelope = $this->envelope()->setData(['a' => 1])->reset();
 
-        self::assertSame([], $envelope->all());
-        self::assertFalse($envelope->has('a'));
+        $this->assertSame([], $envelope->all());
+        $this->assertFalse($envelope->has('a'));
     }
 
     public function testPropertiesAreReadFromTheirReservedKey(): void
@@ -95,12 +95,12 @@ class EnvelopeTest extends TestCase
         $envelope = $this->envelope()
             ->set(MessageQueueEnvelopeInterface::PROPERTY_KEY, ['delivery_mode' => 2]);
 
-        self::assertSame(['delivery_mode' => 2], $envelope->getProperties());
+        $this->assertSame(['delivery_mode' => 2], $envelope->getProperties());
     }
 
     public function testPropertiesDefaultToAnEmptyArray(): void
     {
-        self::assertSame([], $this->envelope()->getProperties());
+        $this->assertSame([], $this->envelope()->getProperties());
     }
 
     /**
@@ -111,15 +111,15 @@ class EnvelopeTest extends TestCase
     {
         $envelope = $this->envelope()->set(MessageQueueEnvelopeInterface::PROPERTY_KEY, 'garbage');
 
-        self::assertSame([], $envelope->getProperties());
+        $this->assertSame([], $envelope->getProperties());
     }
 
     public function testPopulateReplacesTheContentsRatherThanMergingIntoThem(): void
     {
         $envelope = $this->envelope()->setData(['stale' => 'value'])->populate('{"fresh":"value"}');
 
-        self::assertSame(['fresh' => 'value'], $envelope->all());
-        self::assertFalse($envelope->has('stale'));
+        $this->assertSame(['fresh' => 'value'], $envelope->all());
+        $this->assertFalse($envelope->has('stale'));
     }
 
     public function testPopulateRoundTripsABody(): void
@@ -127,7 +127,7 @@ class EnvelopeTest extends TestCase
         $data = ['sku' => 'SKU-1', 'tags' => ['a', 'b'], 'nested' => ['x' => 1]];
         $envelope = $this->envelope()->populate($this->envelope()->setData($data)->getBody());
 
-        self::assertSame($data, $envelope->all());
+        $this->assertSame($data, $envelope->all());
     }
 
     /**
@@ -157,11 +157,11 @@ class EnvelopeTest extends TestCase
 
         try {
             $envelope->populate('42');
-            self::fail('Expected the malformed body to be rejected.');
+            $this->fail('Expected the malformed body to be rejected.');
         } catch (InvalidArgumentException) {
             // Expected.
         }
 
-        self::assertSame(['a' => 1], $envelope->all());
+        $this->assertSame(['a' => 1], $envelope->all());
     }
 }

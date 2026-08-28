@@ -24,28 +24,28 @@ trait WiringAssertions
     /**
      * Every XML file in `etc/` parses.
      */
-    public static function assertEveryConfigFileParses(string $moduleDir): void
+    public function assertEveryConfigFileParses(string $moduleDir): void
     {
         $broken = [];
 
-        foreach (self::allEtcXml($moduleDir) as $file) {
-            if (self::loadXml($file) === null) {
-                $broken[] = self::relative($moduleDir, $file);
+        foreach ($this->allEtcXml($moduleDir) as $file) {
+            if ($this->loadXml($file) === null) {
+                $broken[] = $this->relative($moduleDir, $file);
             }
         }
 
-        self::assertSame([], $broken, "These files do not parse as XML:\n  " . implode("\n  ", $broken));
+        $this->assertSame([], $broken, "These files do not parse as XML:\n  " . implode("\n  ", $broken));
     }
 
     /**
      * Every observer in `events.xml` names something that can be built.
      */
-    public static function assertEveryObserverExists(string $moduleDir): void
+    public function assertEveryObserverExists(string $moduleDir): void
     {
         $problems = [];
 
-        foreach (self::etcFiles($moduleDir, 'events.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'events.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -55,11 +55,11 @@ trait WiringAssertions
                 foreach ($event->observer as $observer) {
                     $instance = (string) $observer['instance'];
 
-                    if (!self::isResolvableName($moduleDir, $instance)) {
+                    if (!$this->isResolvableName($moduleDir, $instance)) {
                         $problems[] = sprintf(
                             '%s: observer "%s" on event "%s" names %s, which is neither a class in this '
                             . 'module nor a virtualType it declares',
-                            self::relative($moduleDir, $file),
+                            $this->relative($moduleDir, $file),
                             (string) $observer['name'],
                             (string) $event['name'],
                             $instance
@@ -69,35 +69,35 @@ trait WiringAssertions
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
      * Every cron job names a class that exists and a method it really has.
      */
-    public static function assertEveryCronJobIsCallable(string $moduleDir): void
+    public function assertEveryCronJobIsCallable(string $moduleDir): void
     {
         $problems = [];
 
-        foreach (self::etcFiles($moduleDir, 'crontab.xml') as $file) {
-            foreach (self::cronJobs($moduleDir, $file) as $problem) {
+        foreach ($this->etcFiles($moduleDir, 'crontab.xml') as $file) {
+            foreach ($this->cronJobs($moduleDir, $file) as $problem) {
                 $problems[] = $problem;
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
      * Every registered console command takes its name from `di.xml`.
      */
-    public static function assertEveryCommandIsNamedInDi(string $moduleDir): void
+    public function assertEveryCommandIsNamedInDi(string $moduleDir): void
     {
         $problems = [];
         $names = [];
 
-        foreach (self::registeredCommands($moduleDir) as $class) {
-            $name = self::declaredCommandName($moduleDir, $class);
+        foreach ($this->registeredCommands($moduleDir) as $class) {
+            $name = $this->declaredCommandName($moduleDir, $class);
 
             if ($name === null) {
                 $problems[] = sprintf('%s is registered but no di.xml argument names it.', $class);
@@ -110,25 +110,25 @@ trait WiringAssertions
 
             $names[$name] = $class;
 
-            $file = self::fileForClass($moduleDir, $class);
+            $file = $this->fileForClass($moduleDir, $class);
 
             if ($file !== null && preg_match('/->setName\(/', (string) file_get_contents($file)) === 1) {
                 $problems[] = sprintf('%s calls setName(); the name belongs in di.xml.', $class);
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
      * @return string[] Every class listed under CommandListInterface.
      */
-    private static function registeredCommands(string $moduleDir): array
+    private function registeredCommands(string $moduleDir): array
     {
         $commands = [];
 
-        foreach (self::etcFiles($moduleDir, 'di.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'di.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -147,10 +147,10 @@ trait WiringAssertions
         return $commands;
     }
 
-    private static function declaredCommandName(string $moduleDir, string $class): ?string
+    private function declaredCommandName(string $moduleDir, string $class): ?string
     {
-        foreach (self::etcFiles($moduleDir, 'di.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'di.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -176,34 +176,34 @@ trait WiringAssertions
      * Every REST route names a service that exists, is authorised, and returns
      * something Magento can actually serialise.
      */
-    public static function assertEveryWebApiRouteIsServiceable(string $moduleDir): void
+    public function assertEveryWebApiRouteIsServiceable(string $moduleDir): void
     {
         $problems = [];
 
-        foreach (self::etcFiles($moduleDir, 'webapi.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'webapi.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
             }
 
-            $declared = self::declaredAclResources($moduleDir);
+            $declared = $this->declaredAclResources($moduleDir);
 
             foreach ($xml->route as $route) {
-                foreach (self::webApiRouteProblems($moduleDir, $file, $route, $declared) as $problem) {
+                foreach ($this->webApiRouteProblems($moduleDir, $file, $route, $declared) as $problem) {
                     $problems[] = $problem;
                 }
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
      * @param string[] $declaredResources
      * @return string[]
      */
-    private static function webApiRouteProblems(
+    private function webApiRouteProblems(
         string $moduleDir,
         string $file,
         SimpleXMLElement $route,
@@ -211,7 +211,7 @@ trait WiringAssertions
     ): array {
         $where = sprintf(
             '%s: %s %s',
-            self::relative($moduleDir, $file),
+            $this->relative($moduleDir, $file),
             (string) $route['method'],
             (string) $route['url']
         );
@@ -229,15 +229,15 @@ trait WiringAssertions
             return [sprintf('%s names %s::%s(), which does not exist', $where, $class, $method)];
         }
 
-        foreach (self::routeResourceProblems($where, $route, $declaredResources) as $problem) {
+        foreach ($this->routeResourceProblems($where, $route, $declaredResources) as $problem) {
             $problems[] = $problem;
         }
 
-        foreach (self::routeUrlParameterProblems($where, $route, $reflection->getMethod($method)) as $problem) {
+        foreach ($this->routeUrlParameterProblems($where, $route, $reflection->getMethod($method)) as $problem) {
             $problems[] = $problem;
         }
 
-        foreach (self::returnTypeProblems($where, $reflection->getMethod($method)) as $problem) {
+        foreach ($this->returnTypeProblems($where, $reflection->getMethod($method)) as $problem) {
             $problems[] = $problem;
         }
 
@@ -248,7 +248,7 @@ trait WiringAssertions
      * @param string[] $declaredResources
      * @return string[]
      */
-    private static function routeResourceProblems(
+    private function routeResourceProblems(
         string $where,
         SimpleXMLElement $route,
         array $declaredResources
@@ -287,7 +287,7 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function routeUrlParameterProblems(
+    private function routeUrlParameterProblems(
         string $where,
         SimpleXMLElement $route,
         ReflectionMethod $method
@@ -323,10 +323,10 @@ trait WiringAssertions
      *
      * @return string[]
      */
-    private static function returnTypeProblems(string $where, ReflectionMethod $method): array
+    private function returnTypeProblems(string $where, ReflectionMethod $method): array
     {
         $problems = [];
-        $annotation = self::returnAnnotation($method);
+        $annotation = $this->returnAnnotation($method);
 
         if ($annotation === null) {
             return [sprintf(
@@ -338,8 +338,8 @@ trait WiringAssertions
             )];
         }
 
-        foreach (self::dataInterfacesIn($annotation) as $interface) {
-            foreach (self::gettersWithoutReturnAnnotation($interface) as $getter) {
+        foreach ($this->dataInterfacesIn($annotation) as $interface) {
+            foreach ($this->gettersWithoutReturnAnnotation($interface) as $getter) {
                 $problems[] = sprintf(
                     '%s returns %s, whose %s() has no @return annotation - the first call that reaches it '
                     . 'throws from inside TypeProcessor',
@@ -353,7 +353,7 @@ trait WiringAssertions
         return $problems;
     }
 
-    private static function returnAnnotation(ReflectionMethod $method): ?string
+    private function returnAnnotation(ReflectionMethod $method): ?string
     {
         $docBlock = $method->getDocComment();
 
@@ -369,7 +369,7 @@ trait WiringAssertions
      *
      * @return string[]
      */
-    private static function dataInterfacesIn(string $annotation): array
+    private function dataInterfacesIn(string $annotation): array
     {
         $interfaces = [];
 
@@ -387,7 +387,7 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function gettersWithoutReturnAnnotation(string $interface): array
+    private function gettersWithoutReturnAnnotation(string $interface): array
     {
         $missing = [];
 
@@ -402,7 +402,7 @@ trait WiringAssertions
                 continue;
             }
 
-            if (self::returnAnnotation($method) === null) {
+            if ($this->returnAnnotation($method) === null) {
                 $missing[] = $name;
             }
         }
@@ -415,18 +415,18 @@ trait WiringAssertions
      *
      * @return string[]
      */
-    private static function declaredAclResources(string $moduleDir): array
+    private function declaredAclResources(string $moduleDir): array
     {
         $ids = [];
 
-        foreach (self::etcFiles($moduleDir, 'acl.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'acl.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
             }
 
-            foreach (self::aclPaths($xml->acl->resources[0] ?? null) as $path) {
+            foreach ($this->aclPaths($xml->acl->resources[0] ?? null) as $path) {
                 foreach ($path as $id) {
                     $ids[$id] = true;
                 }
@@ -439,9 +439,9 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function cronJobs(string $moduleDir, string $file): array
+    private function cronJobs(string $moduleDir, string $file): array
     {
-        $xml = self::loadXml($file);
+        $xml = $this->loadXml($file);
 
         if ($xml === null) {
             return [];
@@ -453,12 +453,12 @@ trait WiringAssertions
             foreach ($group->job as $job) {
                 $instance = (string) $job['instance'];
                 $method = (string) $job['method'];
-                $target = self::concreteClassFor($moduleDir, $instance);
+                $target = $this->concreteClassFor($moduleDir, $instance);
 
                 if ($target === null) {
                     $problems[] = sprintf(
                         '%s: job "%s" names %s, which does not exist',
-                        self::relative($moduleDir, $file),
+                        $this->relative($moduleDir, $file),
                         (string) $job['name'],
                         $instance
                     );
@@ -468,7 +468,7 @@ trait WiringAssertions
                 if (!method_exists($target, $method)) {
                     $problems[] = sprintf(
                         '%s: job "%s" calls %s::%s(), which does not exist',
-                        self::relative($moduleDir, $file),
+                        $this->relative($moduleDir, $file),
                         (string) $job['name'],
                         $target,
                         $method
@@ -480,7 +480,7 @@ trait WiringAssertions
                 if ((string) $job->schedule === '' && (string) $job->config_path === '') {
                     $problems[] = sprintf(
                         '%s: job "%s" has neither <schedule> nor <config_path>, so it never runs',
-                        self::relative($moduleDir, $file),
+                        $this->relative($moduleDir, $file),
                         (string) $job['name']
                     );
                 }
@@ -493,26 +493,26 @@ trait WiringAssertions
     /**
      * Consumers, topics and queues agree with each other.
      */
-    public static function assertMessageQueueWiringAgrees(string $moduleDir): void
+    public function assertMessageQueueWiringAgrees(string $moduleDir): void
     {
         $problems = array_merge(
-            self::consumerHandlerProblems($moduleDir),
-            self::topicProblems($moduleDir)
+            $this->consumerHandlerProblems($moduleDir),
+            $this->topicProblems($moduleDir)
         );
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
      * @return string[]
      */
-    private static function consumerHandlerProblems(string $moduleDir): array
+    private function consumerHandlerProblems(string $moduleDir): array
     {
         $problems = [];
-        $boundQueues = self::boundQueues($moduleDir);
+        $boundQueues = $this->boundQueues($moduleDir);
 
-        foreach (self::etcFiles($moduleDir, 'queue_consumer.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'queue_consumer.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -522,7 +522,7 @@ trait WiringAssertions
                 $name = (string) $consumer['name'];
                 $handler = (string) $consumer['handler'];
                 [$class, $method] = array_pad(explode('::', $handler, 2), 2, '');
-                $target = self::concreteClassFor($moduleDir, $class);
+                $target = $this->concreteClassFor($moduleDir, $class);
 
                 if ($target === null) {
                     $problems[] = sprintf('consumer "%s" is handled by %s, which does not exist', $name, $class);
@@ -554,13 +554,13 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function topicProblems(string $moduleDir): array
+    private function topicProblems(string $moduleDir): array
     {
         $problems = [];
         $declared = [];
 
-        foreach (self::etcFiles($moduleDir, 'communication.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'communication.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -585,7 +585,7 @@ trait WiringAssertions
             return $problems;
         }
 
-        foreach (self::publishedTopics($moduleDir) as $topic => $where) {
+        foreach ($this->publishedTopics($moduleDir) as $topic => $where) {
             if (!in_array($topic, $declared, true)) {
                 $problems[] = sprintf(
                     '%s publishes topic "%s", which communication.xml does not declare',
@@ -601,12 +601,12 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function boundQueues(string $moduleDir): array
+    private function boundQueues(string $moduleDir): array
     {
         $queues = [];
 
-        foreach (self::etcFiles($moduleDir, 'queue_topology.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'queue_topology.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -629,19 +629,19 @@ trait WiringAssertions
      *
      * @return array<string, string> Topic => the file that names it.
      */
-    private static function publishedTopics(string $moduleDir): array
+    private function publishedTopics(string $moduleDir): array
     {
         $topics = [];
 
-        foreach (self::etcFiles($moduleDir, 'queue_publisher.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'queue_publisher.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
             }
 
             foreach ($xml->publisher as $publisher) {
-                $topics[(string) $publisher['topic']] = self::relative($moduleDir, $file);
+                $topics[(string) $publisher['topic']] = $this->relative($moduleDir, $file);
             }
         }
 
@@ -651,18 +651,18 @@ trait WiringAssertions
     /**
      * A config-section ACL resource hangs from the exact core chain.
      */
-    public static function assertAclConfigResourceUsesTheCoreChain(string $moduleDir): void
+    public function assertAclConfigResourceUsesTheCoreChain(string $moduleDir): void
     {
         $problems = [];
 
-        foreach (self::etcFiles($moduleDir, 'acl.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'acl.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
             }
 
-            foreach (self::aclPaths($xml->acl->resources[0] ?? null) as $path) {
+            foreach ($this->aclPaths($xml->acl->resources[0] ?? null) as $path) {
                 $index = array_search('Magento_Config::config', $path, true);
 
                 if ($index === false) {
@@ -671,19 +671,19 @@ trait WiringAssertions
 
                 $chain = array_slice($path, 0, $index + 1);
 
-                if ($chain !== self::aclConfigChain()) {
+                if ($chain !== $this->aclConfigChain()) {
                     $problems[] = sprintf(
                         "%s declares Magento_Config::config under\n      %s\n    and the only chain that "
                         . "re-parents the core node instead of duplicating it is\n      %s",
-                        self::relative($moduleDir, $file),
+                        $this->relative($moduleDir, $file),
                         implode(' > ', $chain),
-                        implode(' > ', self::aclConfigChain())
+                        implode(' > ', $this->aclConfigChain())
                     );
                 }
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
@@ -692,7 +692,7 @@ trait WiringAssertions
      * @param  string[] $prefix
      * @return array<int, string[]>
      */
-    private static function aclPaths(?SimpleXMLElement $resources, array $prefix = []): array
+    private function aclPaths(?SimpleXMLElement $resources, array $prefix = []): array
     {
         if ($resources === null) {
             return [];
@@ -705,7 +705,7 @@ trait WiringAssertions
             $path[] = (string) $resource['id'];
             $paths[] = $path;
 
-            foreach (self::aclPaths($resource, $path) as $child) {
+            foreach ($this->aclPaths($resource, $path) as $child) {
                 $paths[] = $child;
             }
         }
@@ -716,12 +716,12 @@ trait WiringAssertions
     /**
      * Every admin controller is actually protected, by a resource that exists.
      */
-    public static function assertEveryAdminControllerRequiresLogin(string $moduleDir): void
+    public function assertEveryAdminControllerRequiresLogin(string $moduleDir): void
     {
         $problems = [];
-        $declared = self::aclResourceIds($moduleDir);
+        $declared = $this->aclResourceIds($moduleDir);
 
-        foreach (self::adminControllers($moduleDir) as $class) {
+        foreach ($this->adminControllers($moduleDir) as $class) {
             if (!class_exists($class)) {
                 continue;
             }
@@ -759,18 +759,18 @@ trait WiringAssertions
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
      * @return string[]
      */
-    private static function adminControllers(string $moduleDir): array
+    private function adminControllers(string $moduleDir): array
     {
-        [$prefix, $dir] = self::psr4($moduleDir);
+        [$prefix, $dir] = $this->psr4($moduleDir);
         $classes = [];
 
-        foreach (self::sourceFiles($moduleDir) as $file) {
+        foreach ($this->sourceFiles($moduleDir) as $file) {
             if (!str_contains($file, '/Controller/Adminhtml/')) {
                 continue;
             }
@@ -785,18 +785,18 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function aclResourceIds(string $moduleDir): array
+    private function aclResourceIds(string $moduleDir): array
     {
         $ids = [];
 
-        foreach (self::etcFiles($moduleDir, 'acl.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'acl.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
             }
 
-            foreach (self::aclPaths($xml->acl->resources[0] ?? null) as $path) {
+            foreach ($this->aclPaths($xml->acl->resources[0] ?? null) as $path) {
                 foreach ($path as $id) {
                     $ids[] = $id;
                 }
@@ -809,17 +809,17 @@ trait WiringAssertions
     /**
      * A UI grid data source is declared in the *global* `di.xml`.
      */
-    public static function assertGridDataSourcesAreDeclaredGlobally(string $moduleDir): void
+    public function assertGridDataSourcesAreDeclaredGlobally(string $moduleDir): void
     {
         $problems = [];
         $factory = 'Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory';
 
-        foreach (self::diFiles($moduleDir) as $file) {
+        foreach ($this->diFiles($moduleDir) as $file) {
             if (str_ends_with($file, '/etc/di.xml')) {
                 continue;
             }
 
-            $xml = self::loadXml($file);
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -831,13 +831,13 @@ trait WiringAssertions
                         '%s declares the UI CollectionFactory. Area arguments replace the global array '
                         . 'wholesale rather than adding to it, which unregisters every core grid in that '
                         . 'area. Move the <type> to etc/di.xml',
-                        self::relative($moduleDir, $file)
+                        $this->relative($moduleDir, $file)
                     );
                 }
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
@@ -845,11 +845,11 @@ trait WiringAssertions
      *
      * @param string[] $deliberatelyUnset Config paths that have no default on purpose.
      */
-    public static function assertEverySettingHasADefault(string $moduleDir, array $deliberatelyUnset = []): void
+    public function assertEverySettingHasADefault(string $moduleDir, array $deliberatelyUnset = []): void
     {
-        $fields = self::systemXmlPaths($moduleDir);
-        $defaults = self::configXmlPaths($moduleDir);
-        $section = self::configSection($moduleDir);
+        $fields = $this->systemXmlPaths($moduleDir);
+        $defaults = $this->configXmlPaths($moduleDir);
+        $section = $this->configSection($moduleDir);
         $problems = [];
 
         foreach ($fields as $path => $isSecret) {
@@ -883,7 +883,7 @@ trait WiringAssertions
             }
         }
 
-        self::assertSame(
+        $this->assertSame(
             [],
             $problems,
             ($section === '' ? '' : sprintf("Section %s:\n  ", $section)) . implode("\n  ", $problems)
@@ -895,12 +895,12 @@ trait WiringAssertions
      *
      * @return array<string, bool> Full config path => is an encrypted secret.
      */
-    private static function systemXmlPaths(string $moduleDir): array
+    private function systemXmlPaths(string $moduleDir): array
     {
         $paths = [];
 
-        foreach (self::etcFiles($moduleDir, 'system.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'system.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -928,12 +928,12 @@ trait WiringAssertions
     /**
      * @return string[]
      */
-    private static function configXmlPaths(string $moduleDir): array
+    private function configXmlPaths(string $moduleDir): array
     {
         $paths = [];
 
-        foreach (self::etcFiles($moduleDir, 'config.xml') as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->etcFiles($moduleDir, 'config.xml') as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -957,10 +957,10 @@ trait WiringAssertions
      * The concrete class a di.xml name resolves to, following one virtualType
      * hop, or null when nothing on disk answers to it.
      */
-    private static function concreteClassFor(string $moduleDir, string $name): ?string
+    private function concreteClassFor(string $moduleDir, string $name): ?string
     {
         $name = ltrim($name, '\\');
-        $virtualTypes = self::virtualTypes($moduleDir);
+        $virtualTypes = $this->virtualTypes($moduleDir);
         $seen = [];
 
         while (isset($virtualTypes[$name]) && !isset($seen[$name])) {
@@ -972,7 +972,7 @@ trait WiringAssertions
             return $name;
         }
 
-        $file = self::fileForClass($moduleDir, $name);
+        $file = $this->fileForClass($moduleDir, $name);
 
         return $file !== null && is_file($file) ? $name : null;
     }
@@ -982,7 +982,7 @@ trait WiringAssertions
      *
      * @return string[]
      */
-    private static function aclConfigChain(): array
+    private function aclConfigChain(): array
     {
         return [
             'Magento_Backend::admin',
@@ -992,7 +992,7 @@ trait WiringAssertions
         ];
     }
 
-    private static function relative(string $moduleDir, string $file): string
+    private function relative(string $moduleDir, string $file): string
     {
         return str_starts_with($file, $moduleDir . '/') ? substr($file, strlen($moduleDir) + 1) : $file;
     }

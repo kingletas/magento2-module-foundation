@@ -29,19 +29,19 @@ class ModuleConfigTest extends TestCase
 
     public function testQualifiesPathsWithTheConfiguredSection(): void
     {
-        $this->scopeConfig->expects(self::once())
+        $this->scopeConfig->expects($this->once())
             ->method('getValue')
             ->with('acme_thing/general/name', ScopeInterface::SCOPE_STORE, 7)
             ->willReturn('value');
 
-        self::assertSame('value', $this->config->getString('general/name', '', 7));
+        $this->assertSame('value', $this->config->getString('general/name', '', 7));
     }
 
     public function testALeadingSlashOnTheRelativePathIsTolerated(): void
     {
-        $this->scopeConfig->expects(self::once())
+        $this->scopeConfig->expects($this->once())
             ->method('getValue')
-            ->with('acme_thing/general/name', self::anything(), self::anything())
+            ->with('acme_thing/general/name', $this->anything(), $this->anything())
             ->willReturn('v');
 
         $this->config->getString('/general/name');
@@ -51,10 +51,10 @@ class ModuleConfigTest extends TestCase
     {
         $this->scopeConfig->method('getValue')->willReturn(null);
 
-        self::assertSame('fallback', $this->config->getString('a', 'fallback'));
-        self::assertSame(9, $this->config->getInt('a', 9));
-        self::assertSame(1.5, $this->config->getFloat('a', 1.5));
-        self::assertSame([], $this->config->getList('a'));
+        $this->assertSame('fallback', $this->config->getString('a', 'fallback'));
+        $this->assertSame(9, $this->config->getInt('a', 9));
+        $this->assertSame(1.5, $this->config->getFloat('a', 1.5));
+        $this->assertSame([], $this->config->getList('a'));
     }
 
     /**
@@ -65,16 +65,16 @@ class ModuleConfigTest extends TestCase
     {
         $this->scopeConfig->method('getValue')->willReturnOnConsecutiveCalls('0', '-5', '25');
 
-        self::assertSame(100, $this->config->getPositiveInt('batch', 100));
-        self::assertSame(100, $this->config->getPositiveInt('batch', 100));
-        self::assertSame(25, $this->config->getPositiveInt('batch', 100));
+        $this->assertSame(100, $this->config->getPositiveInt('batch', 100));
+        $this->assertSame(100, $this->config->getPositiveInt('batch', 100));
+        $this->assertSame(25, $this->config->getPositiveInt('batch', 100));
     }
 
     public function testListIsTrimmedAndStrippedOfBlanks(): void
     {
         $this->scopeConfig->method('getValue')->willReturn(' a@x.com , , b@x.com ,');
 
-        self::assertSame(['a@x.com', 'b@x.com'], $this->config->getList('recipients'));
+        $this->assertSame(['a@x.com', 'b@x.com'], $this->config->getList('recipients'));
     }
 
     /**
@@ -83,16 +83,16 @@ class ModuleConfigTest extends TestCase
      */
     public function testFlagsGoThroughIsSetFlagRatherThanACast(): void
     {
-        $this->scopeConfig->expects(self::once())
+        $this->scopeConfig->expects($this->once())
             ->method('isSetFlag')
             ->with('acme_thing/general/enabled', ScopeInterface::SCOPE_STORE, null)
             ->willReturn(false);
 
-        self::assertFalse($this->config->isSetFlag('general/enabled'));
+        $this->assertFalse($this->config->isSetFlag('general/enabled'));
     }
 
     public function testExposesItsSection(): void
     {
-        self::assertSame('acme_thing', $this->config->getSection());
+        $this->assertSame('acme_thing', $this->config->getSection());
     }
 }

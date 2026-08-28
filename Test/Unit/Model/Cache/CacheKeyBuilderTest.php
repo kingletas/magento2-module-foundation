@@ -20,7 +20,7 @@ class CacheKeyBuilderTest extends TestCase
     {
         $builder = new CacheKeyBuilder(new Json(), 'acme');
 
-        self::assertSame('acme_1_SKU-9', $builder->build(1, 'SKU-9'));
+        $this->assertSame('acme_1_SKU-9', $builder->build(1, 'SKU-9'));
     }
 
     /**
@@ -31,18 +31,18 @@ class CacheKeyBuilderTest extends TestCase
     {
         $builder = new CacheKeyBuilder(new Json(), 'acme');
 
-        self::assertSame('acme', $builder->build());
-        self::assertSame('acme_a', $builder->build('a'));
-        self::assertSame('acme_a_b_c_d_e', $builder->build('a', 'b', 'c', 'd', 'e'));
-        self::assertStringNotContainsString('%', $builder->build('a'));
+        $this->assertSame('acme', $builder->build());
+        $this->assertSame('acme_a', $builder->build('a'));
+        $this->assertSame('acme_a_b_c_d_e', $builder->build('a', 'b', 'c', 'd', 'e'));
+        $this->assertStringNotContainsString('%', $builder->build('a'));
     }
 
     public function testDifferentPartsNeverCollide(): void
     {
         $builder = new CacheKeyBuilder(new Json(), 'acme');
 
-        self::assertNotSame($builder->build('a', 'b'), $builder->build('ab'));
-        self::assertNotSame($builder->build('a', 'b'), $builder->build('b', 'a'));
+        $this->assertNotSame($builder->build('a', 'b'), $builder->build('ab'));
+        $this->assertNotSame($builder->build('a', 'b'), $builder->build('b', 'a'));
     }
 
     /**
@@ -54,26 +54,26 @@ class CacheKeyBuilderTest extends TestCase
         $builder = new CacheKeyBuilder(new Json(), 'acme');
         $key = $builder->build(range(1, 10000));
 
-        self::assertLessThan(100, strlen($key));
-        self::assertStringNotContainsString('Array', $key);
-        self::assertNotSame($builder->build(range(1, 10000)), $builder->build(range(1, 9999)));
+        $this->assertLessThan(100, strlen($key));
+        $this->assertStringNotContainsString('Array', $key);
+        $this->assertNotSame($builder->build(range(1, 10000)), $builder->build(range(1, 9999)));
     }
 
     public function testNormalisesUnsafeCharactersAndNulls(): void
     {
         $builder = new CacheKeyBuilder(new Json(), 'acme');
 
-        self::assertSame('acme_a-b', $builder->build('a b'));
-        self::assertSame('acme_1', $builder->build(null, 1));
-        self::assertSame('acme_1_0', $builder->build(true, false));
+        $this->assertSame('acme_a-b', $builder->build('a b'));
+        $this->assertSame('acme_1', $builder->build(null, 1));
+        $this->assertSame('acme_1_0', $builder->build(true, false));
     }
 
     public function testCarriesItsTagsAndLifetime(): void
     {
         $builder = new CacheKeyBuilder(new Json(), 'acme', ['tag_a', 'tag_b'], 3600);
 
-        self::assertSame(['tag_a', 'tag_b'], $builder->getTags());
-        self::assertSame(3600, $builder->getLifetime());
-        self::assertNull((new CacheKeyBuilder(new Json(), 'acme'))->getLifetime());
+        $this->assertSame(['tag_a', 'tag_b'], $builder->getTags());
+        $this->assertSame(3600, $builder->getLifetime());
+        $this->assertNull((new CacheKeyBuilder(new Json(), 'acme'))->getLifetime());
     }
 }

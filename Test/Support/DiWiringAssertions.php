@@ -23,13 +23,13 @@ trait DiWiringAssertions
      * @param string   $moduleDir Absolute path to the module root.
      * @param string[] $templates Classes a store is expected to complete.
      */
-    public static function assertEveryInjectedInterfaceIsResolvable(
+    public function assertEveryInjectedInterfaceIsResolvable(
         string $moduleDir,
         array $templates = []
     ): void {
-        $interfaces = self::declaredInterfaces($moduleDir);
-        $constructors = self::constructorParameters($moduleDir);
-        [$preferences, $arguments] = self::diConfiguration($moduleDir);
+        $interfaces = $this->declaredInterfaces($moduleDir);
+        $constructors = $this->constructorParameters($moduleDir);
+        [$preferences, $arguments] = $this->diConfiguration($moduleDir);
 
         $unresolvable = [];
 
@@ -51,7 +51,7 @@ trait DiWiringAssertions
             }
         }
 
-        self::assertSame(
+        $this->assertSame(
             [],
             $unresolvable,
             "The object manager cannot build these. Add a <preference> for the interface, or an "
@@ -66,11 +66,11 @@ trait DiWiringAssertions
      *
      * @param string $moduleDir Absolute path to the module root.
      */
-    public static function assertEveryPreferenceResolvesToAnImplementation(string $moduleDir): void
+    public function assertEveryPreferenceResolvesToAnImplementation(string $moduleDir): void
     {
         $problems = [];
 
-        foreach (self::preferencePairs($moduleDir) as [$for, $type]) {
+        foreach ($this->preferencePairs($moduleDir) as [$for, $type]) {
             if (!interface_exists($for) && !class_exists($for)) {
                 $problems[] = sprintf('%s is preferred but does not exist', $for);
                 continue;
@@ -86,7 +86,7 @@ trait DiWiringAssertions
             }
         }
 
-        self::assertSame([], $problems, implode("\n  ", $problems));
+        $this->assertSame([], $problems, implode("\n  ", $problems));
     }
 
     /**
@@ -95,13 +95,13 @@ trait DiWiringAssertions
      *
      * @param string $moduleDir Absolute path to the module root.
      */
-    public static function assertNoVirtualTypeIsReferencedThroughAGeneratedProxy(string $moduleDir): void
+    public function assertNoVirtualTypeIsReferencedThroughAGeneratedProxy(string $moduleDir): void
     {
         $virtualTypes = [];
         $proxyReferences = [];
 
-        foreach (self::diFiles($moduleDir) as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->diFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -111,7 +111,7 @@ trait DiWiringAssertions
                 $virtualTypes[] = (string) $virtualType['name'];
             }
 
-            foreach (self::descendants($xml) as $node) {
+            foreach ($this->descendants($xml) as $node) {
                 $value = trim((string) $node);
 
                 if (str_ends_with($value, '\\Proxy')) {
@@ -147,17 +147,17 @@ trait DiWiringAssertions
             }
         }
 
-        self::assertSame([], array_values(array_unique($broken)), implode("\n  ", $broken));
+        $this->assertSame([], array_values(array_unique($broken)), implode("\n  ", $broken));
     }
 
     /**
      * @return string[] Fully qualified interface names declared in the module.
      */
-    private static function declaredInterfaces(string $moduleDir): array
+    private function declaredInterfaces(string $moduleDir): array
     {
         $interfaces = [];
 
-        foreach (self::sourceFiles($moduleDir) as $file) {
+        foreach ($this->sourceFiles($moduleDir) as $file) {
             $source = (string) file_get_contents($file);
 
             if (preg_match('/^namespace\s+([^;]+);/m', $source, $namespace) === 1
@@ -173,11 +173,11 @@ trait DiWiringAssertions
     /**
      * @return array<string, array<int, array{0: string, 1: string}>> Class => [[type, parameter name], …].
      */
-    private static function constructorParameters(string $moduleDir): array
+    private function constructorParameters(string $moduleDir): array
     {
         $constructors = [];
 
-        foreach (self::sourceFiles($moduleDir) as $file) {
+        foreach ($this->sourceFiles($moduleDir) as $file) {
             $source = (string) file_get_contents($file);
 
             if (preg_match('/^namespace\s+([^;]+);/m', $source, $namespace) !== 1) {
@@ -197,7 +197,7 @@ trait DiWiringAssertions
 
             $imports = [];
 
-            foreach (self::useStatements($source) as $fqcn => $alias) {
+            foreach ($this->useStatements($source) as $fqcn => $alias) {
                 $imports[$alias] = $fqcn;
             }
 
@@ -234,7 +234,7 @@ trait DiWiringAssertions
     /**
      * @return array<string, string> Fully qualified name => alias.
      */
-    private static function useStatements(string $source): array
+    private function useStatements(string $source): array
     {
         preg_match_all('/^use\s+([\w\\\\]+)(?:\s+as\s+(\w+))?;/m', $source, $matches, PREG_SET_ORDER);
 
@@ -251,13 +251,13 @@ trait DiWiringAssertions
     /**
      * @return array{0: string[], 1: array<string, string[]>} Preferences, and type => explicitly named arguments.
      */
-    private static function diConfiguration(string $moduleDir): array
+    private function diConfiguration(string $moduleDir): array
     {
         $preferences = [];
         $arguments = [];
 
-        foreach (self::diFiles($moduleDir) as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->diFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;
@@ -286,12 +286,12 @@ trait DiWiringAssertions
     /**
      * @return array<int, array{0: string, 1: string}>
      */
-    private static function preferencePairs(string $moduleDir): array
+    private function preferencePairs(string $moduleDir): array
     {
         $pairs = [];
 
-        foreach (self::diFiles($moduleDir) as $file) {
-            $xml = self::loadXml($file);
+        foreach ($this->diFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
 
             if ($xml === null) {
                 continue;

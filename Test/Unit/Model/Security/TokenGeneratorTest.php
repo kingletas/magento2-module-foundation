@@ -25,8 +25,8 @@ class TokenGeneratorTest extends TestCase
 
     public function testGeneratesHexOfTwiceTheRequestedByteLength(): void
     {
-        self::assertSame(64, strlen($this->generator->generate(32)));
-        self::assertMatchesRegularExpression('/^[a-f0-9]+$/', $this->generator->generate(32));
+        $this->assertSame(64, strlen($this->generator->generate(32)));
+        $this->assertMatchesRegularExpression('/^[a-f0-9]+$/', $this->generator->generate(32));
     }
 
     /**
@@ -35,8 +35,8 @@ class TokenGeneratorTest extends TestCase
      */
     public function testRequestingLessThanTheMinimumStillYieldsTheMinimum(): void
     {
-        self::assertSame(TokenGenerator::MIN_BYTES * 2, strlen($this->generator->generate(1)));
-        self::assertSame(TokenGenerator::MIN_BYTES * 2, strlen($this->generator->generate(-5)));
+        $this->assertSame(TokenGenerator::MIN_BYTES * 2, strlen($this->generator->generate(1)));
+        $this->assertSame(TokenGenerator::MIN_BYTES * 2, strlen($this->generator->generate(-5)));
     }
 
     public function testTokensAreNotRepeated(): void
@@ -47,14 +47,14 @@ class TokenGeneratorTest extends TestCase
             $tokens[] = $this->generator->generate();
         }
 
-        self::assertCount(200, array_unique($tokens));
+        $this->assertCount(200, array_unique($tokens));
     }
 
     public function testHashIsStableAndDiffersPerToken(): void
     {
-        self::assertSame($this->generator->hash('abc'), $this->generator->hash('abc'));
-        self::assertNotSame($this->generator->hash('abc'), $this->generator->hash('abd'));
-        self::assertSame(64, strlen($this->generator->hash('abc')));
+        $this->assertSame($this->generator->hash('abc'), $this->generator->hash('abc'));
+        $this->assertNotSame($this->generator->hash('abc'), $this->generator->hash('abd'));
+        $this->assertSame(64, strlen($this->generator->hash('abc')));
     }
 
     public function testMatchesComparesACandidateAgainstAStoredDigest(): void
@@ -62,9 +62,9 @@ class TokenGeneratorTest extends TestCase
         $token = $this->generator->generate();
         $stored = $this->generator->hash($token);
 
-        self::assertTrue($this->generator->matches($token, $stored));
-        self::assertFalse($this->generator->matches($token . 'x', $stored));
-        self::assertFalse($this->generator->matches($token, 'not-a-digest'));
+        $this->assertTrue($this->generator->matches($token, $stored));
+        $this->assertFalse($this->generator->matches($token . 'x', $stored));
+        $this->assertFalse($this->generator->matches($token, 'not-a-digest'));
     }
 
     public function testRejectsAnUnavailableAlgorithmAtConstructionRatherThanAtUse(): void

@@ -25,7 +25,7 @@ trait BudgetAssertions
      * @param callable(int): int $measure Given a workload size, returns its cost.
      * @param int[]              $sizes   Workload sizes to compare.
      */
-    public static function assertConstantCost(string $what, callable $measure, array $sizes = [1, 200]): void
+    public function assertConstantCost(string $what, callable $measure, array $sizes = [1, 200]): void
     {
         $observed = [];
 
@@ -36,12 +36,12 @@ trait BudgetAssertions
         $distinct = array_values(array_unique($observed));
 
         if (count($distinct) === 1) {
-            self::assertSame($distinct, $distinct);
+            $this->assertSame($distinct, $distinct);
 
             return;
         }
 
-        self::fail(sprintf(
+        $this->fail(sprintf(
             "%s grows with the size of the work, so something in the loop is a round trip.\n\n  %s\n\n"
             . "Look for a read that could have been hoisted out of the loop, or a per-item lookup that "
             . "could have been one batched call before it.",
@@ -62,9 +62,9 @@ trait BudgetAssertions
      * @param int    $actual What it cost.
      * @param string $detail Optional breakdown, e.g. CountingScopeConfig::summary().
      */
-    public static function assertCostAtMost(string $what, int $limit, int $actual, string $detail = ''): void
+    public function assertCostAtMost(string $what, int $limit, int $actual, string $detail = ''): void
     {
-        self::assertLessThanOrEqual(
+        $this->assertLessThanOrEqual(
             $limit,
             $actual,
             sprintf(
@@ -84,7 +84,7 @@ trait BudgetAssertions
      * @param callable(int): int $measure   Given a workload size, returns its cost.
      * @param int[]              $sizes
      */
-    public static function assertCostPerBatch(
+    public function assertCostPerBatch(
         string $what,
         int $batchSize,
         callable $measure,
@@ -107,7 +107,7 @@ trait BudgetAssertions
             }
         }
 
-        self::assertSame(
+        $this->assertSame(
             [],
             $problems,
             sprintf("%s is not being batched:\n  %s", ucfirst($what), implode("\n  ", $problems))

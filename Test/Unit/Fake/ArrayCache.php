@@ -12,7 +12,7 @@ use Magento\Framework\App\CacheInterface;
 /**
  * A cache in an array, which counts what it was asked.
  */
-final class ArrayCache implements CacheInterface
+class ArrayCache implements CacheInterface
 {
     /** @var array<string, string> */
     public array $entries = [];

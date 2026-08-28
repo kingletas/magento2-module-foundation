@@ -17,11 +17,11 @@ use PHPUnit\Framework\TestCase;
  * The one behaviour that matters here is what happens when the module is not
  * registered.
  */
-final class ModuleFilePathResolverTest extends TestCase
+class ModuleFilePathResolverTest extends TestCase
 {
     public function testARelativePathIsJoinedToTheModuleDirectory(): void
     {
-        self::assertSame(
+        $this->assertSame(
             '/app/vendor/acme/module-feed/etc/feed.csv',
             $this->resolver('/app/vendor/acme/module-feed')->resolve('etc/feed.csv')
         );
@@ -42,7 +42,7 @@ final class ModuleFilePathResolverTest extends TestCase
     #[DataProvider('separatorCases')]
     public function testSeparatorsAreNormalisedToExactlyOne(string $moduleDir, string $relative): void
     {
-        self::assertSame(
+        $this->assertSame(
             '/app/module/etc/feed.csv',
             $this->resolver($moduleDir)->resolve($relative)
         );
@@ -64,8 +64,8 @@ final class ModuleFilePathResolverTest extends TestCase
 
     public function testAnEmptyRelativePathResolvesToTheModuleDirectoryItself(): void
     {
-        self::assertSame('/app/module', $this->resolver('/app/module')->resolve(''));
-        self::assertSame('/app/module', $this->resolver('/app/module/')->resolve('/'));
+        $this->assertSame('/app/module', $this->resolver('/app/module')->resolve(''));
+        $this->assertSame('/app/module', $this->resolver('/app/module/')->resolve('/'));
     }
 
     private function resolver(string $moduleDir): ModuleFilePathResolver

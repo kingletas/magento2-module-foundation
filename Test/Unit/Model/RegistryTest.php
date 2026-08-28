@@ -16,20 +16,20 @@ use stdClass;
  * The registry's whole job is to be boring, and the two ways it stops being
  * boring are both about `null`.
  */
-final class RegistryTest extends TestCase
+class RegistryTest extends TestCase
 {
     public function testAValueComesBackOut(): void
     {
         $registry = new Registry();
         $registry->set('order', 42);
 
-        self::assertSame(42, $registry->get('order'));
+        $this->assertSame(42, $registry->get('order'));
     }
 
     public function testAnAbsentKeyReturnsTheDefault(): void
     {
-        self::assertNull((new Registry())->get('absent'));
-        self::assertSame('fallback', (new Registry())->get('absent', 'fallback'));
+        $this->assertNull((new Registry())->get('absent'));
+        $this->assertSame('fallback', (new Registry())->get('absent', 'fallback'));
     }
 
     /**
@@ -40,8 +40,8 @@ final class RegistryTest extends TestCase
         $registry = new Registry();
         $registry->set('parent_sku', null);
 
-        self::assertNull($registry->get('parent_sku', 'fallback'));
-        self::assertTrue($registry->has('parent_sku'));
+        $this->assertNull($registry->get('parent_sku', 'fallback'));
+        $this->assertTrue($registry->has('parent_sku'));
     }
 
     public function testSettingAKeyTwiceThrows(): void
@@ -64,7 +64,7 @@ final class RegistryTest extends TestCase
         $registry->set('order', 1);
         $registry->set('order', 2, graceful: true);
 
-        self::assertSame(1, $registry->get('order'));
+        $this->assertSame(1, $registry->get('order'));
     }
 
     public function testAGracefulSetOnAStoredNullIsStillACollision(): void
@@ -73,7 +73,7 @@ final class RegistryTest extends TestCase
         $registry->set('order', null);
         $registry->set('order', 'replacement', graceful: true);
 
-        self::assertNull($registry->get('order'), 'A key holding null is a key that is taken.');
+        $this->assertNull($registry->get('order'), 'A key holding null is a key that is taken.');
     }
 
     public function testReplaceOverwritesWithoutComplaint(): void
@@ -82,7 +82,7 @@ final class RegistryTest extends TestCase
         $registry->set('order', 1);
         $registry->replace('order', 2);
 
-        self::assertSame(2, $registry->get('order'));
+        $this->assertSame(2, $registry->get('order'));
     }
 
     public function testReplaceWorksOnAKeyThatWasNeverSet(): void
@@ -90,7 +90,7 @@ final class RegistryTest extends TestCase
         $registry = new Registry();
         $registry->replace('order', 2);
 
-        self::assertSame(2, $registry->get('order'));
+        $this->assertSame(2, $registry->get('order'));
     }
 
     public function testRemoveFreesTheKeyForReuse(): void
@@ -99,9 +99,9 @@ final class RegistryTest extends TestCase
         $registry->set('order', 1);
         $registry->remove('order');
 
-        self::assertFalse($registry->has('order'));
+        $this->assertFalse($registry->has('order'));
         $registry->set('order', 2);
-        self::assertSame(2, $registry->get('order'));
+        $this->assertSame(2, $registry->get('order'));
     }
 
     public function testRemovingAnAbsentKeyIsNotAnError(): void
@@ -109,7 +109,7 @@ final class RegistryTest extends TestCase
         $registry = new Registry();
         $registry->remove('never-set');
 
-        self::assertFalse($registry->has('never-set'));
+        $this->assertFalse($registry->has('never-set'));
     }
 
     public function testFlushEmptiesEverything(): void
@@ -119,8 +119,8 @@ final class RegistryTest extends TestCase
         $registry->set('b', 2);
         $registry->flush();
 
-        self::assertFalse($registry->has('a'));
-        self::assertFalse($registry->has('b'));
+        $this->assertFalse($registry->has('a'));
+        $this->assertFalse($registry->has('b'));
     }
 
     /**
@@ -142,7 +142,7 @@ final class RegistryTest extends TestCase
         $registry->set('service', $object);
         $registry->flush();
 
-        self::assertSame(0, $object->destructCalls);
+        $this->assertSame(0, $object->destructCalls);
     }
 
     public function testRemoveDoesNotRunTeardownOnAStoredObject(): void
@@ -160,7 +160,7 @@ final class RegistryTest extends TestCase
         $registry->set('service', $object);
         $registry->remove('service');
 
-        self::assertSame(0, $object->destructCalls);
+        $this->assertSame(0, $object->destructCalls);
     }
 
     public function testTheSameObjectComesBackRatherThanACopy(): void
@@ -169,7 +169,7 @@ final class RegistryTest extends TestCase
         $object = new stdClass();
         $registry->set('service', $object);
 
-        self::assertSame($object, $registry->get('service'));
+        $this->assertSame($object, $registry->get('service'));
     }
 
     public function testFalseAndZeroAndEmptyStringAreAllStoredValues(): void
@@ -179,8 +179,8 @@ final class RegistryTest extends TestCase
         $registry->set('zero', 0);
         $registry->set('empty', '');
 
-        self::assertFalse($registry->get('false', 'default'));
-        self::assertSame(0, $registry->get('zero', 'default'));
-        self::assertSame('', $registry->get('empty', 'default'));
+        $this->assertFalse($registry->get('false', 'default'));
+        $this->assertSame(0, $registry->get('zero', 'default'));
+        $this->assertSame('', $registry->get('empty', 'default'));
     }
 }
