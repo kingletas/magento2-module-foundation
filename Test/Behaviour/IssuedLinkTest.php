@@ -13,7 +13,7 @@ namespace Commerce\Foundation\Test\Behaviour;
 use Commerce\Foundation\Model\Cache\CacheKeyBuilder;
 use Commerce\Foundation\Model\Registry;
 use Commerce\Foundation\Model\Security\TokenGenerator;
-use Commerce\Foundation\Test\Unit\Fake\ArrayCache;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use PHPUnit\Framework\TestCase;
 
@@ -24,14 +24,18 @@ class IssuedLinkTest extends TestCase
 {
     private TokenGenerator $tokens;
     private CacheKeyBuilder $keys;
-    private ArrayCache $cache;
+    private CacheInterface $cache;
+
+    /** @var array<string, string> */
+    private array $cacheEntries = [];
     private Registry $registry;
 
     protected function setUp(): void
     {
         $this->tokens = new TokenGenerator();
         $this->keys = new CacheKeyBuilder(new Json(), 'commerce_sharecart', ['COMMERCE_SHARED_CART'], 3600);
-        $this->cache = new ArrayCache();
+        $this->cacheEntries = [];
+        $this->cache = $this->cache();
         $this->registry = new Registry();
     }
 
@@ -139,5 +143,27 @@ class IssuedLinkTest extends TestCase
     private function renderInTheBlock(): ?string
     {
         return $this->registry->get('shared_cart_token');
+    }
+
+    private function cache(): CacheInterface
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('load')->willReturnCallback(
+            fn (string $identifier): string|false => $this->cacheEntries[$identifier] ?? false
+        );
+        $cache->method('save')->willReturnCallback(
+            function (string $data, string $identifier): bool {
+                $this->cacheEntries[$identifier] = $data;
+
+                return true;
+            }
+        );
+        $cache->method('clean')->willReturnCallback(function (): bool {
+            $this->cacheEntries = [];
+
+            return true;
+        });
+
+        return $cache;
     }
 }

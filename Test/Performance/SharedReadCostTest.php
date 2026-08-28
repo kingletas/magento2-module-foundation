@@ -16,7 +16,7 @@ use Commerce\Foundation\Model\Catalog\ConfigurableParentSkuResolver;
 use Commerce\Foundation\Model\Config\ModuleConfig;
 use Commerce\Foundation\Test\Support\BudgetAssertions;
 use Commerce\Foundation\Test\Support\CountingScopeConfig;
-use Commerce\Foundation\Test\Unit\Fake\ArrayCache;
+use Magento\Framework\App\CacheInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
@@ -224,7 +224,7 @@ class SharedReadCostTest extends TestCase
         return new ConfigurableParentSkuResolver(
             $resourceConnection,
             $metadataPool,
-            new ArrayCache(),
+            $this->cache(),
             $cacheKeyBuilder
         );
     }
@@ -255,5 +255,24 @@ class SharedReadCostTest extends TestCase
         }
 
         return $rows;
+    }
+
+    private function cache(): CacheInterface
+    {
+        $entries = [];
+
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('load')->willReturnCallback(
+            static fn (string $identifier): string|false => $entries[$identifier] ?? false
+        );
+        $cache->method('save')->willReturnCallback(
+            static function (string $data, string $identifier) use (&$entries): bool {
+                $entries[$identifier] = $data;
+
+                return true;
+            }
+        );
+
+        return $cache;
     }
 }

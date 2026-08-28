@@ -9,7 +9,7 @@ namespace Commerce\Foundation\Test\Unit\Model\Catalog;
 
 use Commerce\Foundation\Api\CacheKeyBuilderInterface;
 use Commerce\Foundation\Model\Catalog\ConfigurableParentSkuResolver;
-use Commerce\Foundation\Test\Unit\Fake\ArrayCache;
+use Magento\Framework\App\CacheInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
@@ -27,8 +27,13 @@ class ConfigurableParentSkuResolverTest extends TestCase
 {
     private AdapterInterface&MockObject $connection;
     private ResourceConnection&MockObject $resourceConnection;
-    private ArrayCache $cache;
     private string $linkField = 'entity_id';
+
+    /** @var array<string, string> What the shared cache holds. */
+    private array $cacheEntries = [];
+
+    /** @var array<int, array{identifier: string, data: string}> Writes seen, in order. */
+    private array $cacheSaves = [];
 
     /** @var array<int, array<string, string>> Rows the next fetchAll returns. */
     private array $rows = [];
@@ -43,7 +48,8 @@ class ConfigurableParentSkuResolverTest extends TestCase
         $this->rows = [];
         $this->joinConditions = [];
         $this->queries = 0;
-        $this->cache = new ArrayCache();
+        $this->cacheEntries = [];
+        $this->cacheSaves = [];
 
         $this->connection = $this->createMock(AdapterInterface::class);
         $this->connection->method('quoteIdentifier')
@@ -124,7 +130,7 @@ class ConfigurableParentSkuResolverTest extends TestCase
 
         $this->resolver()->resolve('STANDALONE');
 
-        $this->assertSame([['identifier' => 'key:STANDALONE', 'data' => '']], $this->cache->saves);
+        $this->assertSame([['identifier' => 'key:STANDALONE', 'data' => '']], $this->cacheSaves);
     }
 
     /**
@@ -133,7 +139,7 @@ class ConfigurableParentSkuResolverTest extends TestCase
      */
     public function testACachedNegativeIsReadBackWithoutQuerying(): void
     {
-        $this->cache->entries['key:STANDALONE'] = '';
+        $this->cacheEntries['key:STANDALONE'] = '';
 
         $this->assertNull($this->resolver()->resolve('STANDALONE'));
         $this->assertSame(0, $this->queries);
@@ -141,7 +147,7 @@ class ConfigurableParentSkuResolverTest extends TestCase
 
     public function testACachedParentIsReadBackWithoutQuerying(): void
     {
-        $this->cache->entries['key:SHIRT-M'] = 'SHIRT';
+        $this->cacheEntries['key:SHIRT-M'] = 'SHIRT';
 
         $this->assertSame('SHIRT', $this->resolver()->resolve('SHIRT-M'));
         $this->assertSame(0, $this->queries);
@@ -152,7 +158,7 @@ class ConfigurableParentSkuResolverTest extends TestCase
      */
     public function testOnlyTheUncachedPartOfABatchIsQueried(): void
     {
-        $this->cache->entries['key:A-1'] = 'A';
+        $this->cacheEntries['key:A-1'] = 'A';
         $this->rows = [['child_sku' => 'B-1', 'parent_sku' => 'B']];
 
         $resolved = $this->resolver()->resolveMany(['A-1', 'B-1']);
@@ -200,7 +206,7 @@ class ConfigurableParentSkuResolverTest extends TestCase
 
         // The same rows the other way round must give the same answer.
         $this->rows = array_reverse($this->rows);
-        $this->cache = new ArrayCache();
+        $this->cacheEntries = [];
 
         $this->assertSame('SHIRT-CLASSIC', $this->resolver()->resolve('SHIRT-M'));
     }
@@ -243,10 +249,29 @@ class ConfigurableParentSkuResolverTest extends TestCase
         return new ConfigurableParentSkuResolver(
             $this->resourceConnection,
             $metadataPool,
-            $this->cache,
+            $this->cache(),
             $keyBuilder
         );
     }
+
+    private function cache(): CacheInterface
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->method('load')->willReturnCallback(
+            fn (string $identifier): string|false => $this->cacheEntries[$identifier] ?? false
+        );
+        $cache->method('save')->willReturnCallback(
+            function (string $data, string $identifier): bool {
+                $this->cacheEntries[$identifier] = $data;
+                $this->cacheSaves[] = ['identifier' => $identifier, 'data' => $data];
+
+                return true;
+            }
+        );
+
+        return $cache;
+    }
+
 
     private function newSelect(): Select
     {

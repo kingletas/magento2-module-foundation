@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Commerce\Foundation\Test\Unit\Model\Setup\Patch;
 
 use Commerce\Foundation\Model\Setup\Patch\AbstractColumnMigrator;
-use Commerce\Foundation\Test\Unit\Fake\CopyColumnMigrator;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
@@ -219,7 +218,7 @@ class AbstractColumnMigratorTest extends TestCase
 
     public function testThePatchDeclaresNoDependenciesOrAliasesOfItsOwn(): void
     {
-        $this->assertSame([], CopyColumnMigrator::getDependencies());
+        $this->assertSame([], AbstractColumnMigrator::getDependencies());
         $this->assertSame([], $this->migrator()->getAliases());
     }
 
@@ -249,7 +248,7 @@ class AbstractColumnMigratorTest extends TestCase
     /**
      * @param array<string, mixed> $overrides
      */
-    private function migrator(array $overrides = [], ?LoggerInterface $logger = null): CopyColumnMigrator
+    private function migrator(array $overrides = [], ?LoggerInterface $logger = null): AbstractColumnMigrator
     {
         $resourceConnection = $this->createMock(ResourceConnection::class);
         $resourceConnection->method('getConnection')->willReturn($this->connection);
@@ -263,7 +262,7 @@ class AbstractColumnMigratorTest extends TestCase
             'chunkSize' => AbstractColumnMigrator::DEFAULT_CHUNK_SIZE,
         ];
 
-        return new CopyColumnMigrator(
+        return new class (
             $resourceConnection,
             $logger ?? new NullLogger(),
             'source',
@@ -272,6 +271,7 @@ class AbstractColumnMigratorTest extends TestCase
             $config['targetColumn'],
             $config['primaryKey'],
             $config['chunkSize']
-        );
+        ) extends AbstractColumnMigrator {
+        };
     }
 }
