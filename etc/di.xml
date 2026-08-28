@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <preference for="Commerce\Foundation\Api\TokenGeneratorInterface"
+                type="Commerce\Foundation\Model\Security\TokenGenerator"/>
+    <preference for="Commerce\Foundation\Api\RegistryInterface"
+                type="Commerce\Foundation\Model\Registry"/>
+    <preference for="Commerce\Foundation\Api\MessageQueueEnvelopeInterface"
+                type="Commerce\Foundation\Model\MessageQueue\Envelope"/>
+    <preference for="Commerce\Foundation\Api\ProductImageUrlResolverInterface"
+                type="Commerce\Foundation\Model\Catalog\ProductImageUrlResolver"/>
+    <preference for="Commerce\Foundation\Api\ConfigurableParentSkuResolverInterface"
+                type="Commerce\Foundation\Model\Catalog\ConfigurableParentSkuResolver"/>
+
+    <!--
+        CacheKeyBuilderInterface is intentionally left without a global
+        preference.
+    -->
+    <virtualType name="Commerce\Foundation\Model\Cache\ConfigurableParentSkuCacheKeyBuilder"
+                 type="Commerce\Foundation\Model\Cache\CacheKeyBuilder">
+        <arguments>
+            <argument name="prefix" xsi:type="string">commerce_cfg_parent_sku</argument>
+            <argument name="tags" xsi:type="array">
+                <item name="catalog_product" xsi:type="const">Magento\Catalog\Model\Product::CACHE_TAG</item>
+            </argument>
+            <argument name="lifetime" xsi:type="number">86400</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Commerce\Foundation\Model\Catalog\ConfigurableParentSkuResolver">
+        <arguments>
+            <argument name="cacheKeyBuilder" xsi:type="object">Commerce\Foundation\Model\Cache\ConfigurableParentSkuCacheKeyBuilder</argument>
+        </arguments>
+    </type>
+
+    <!-- Foundation's own log channel, for consumers that have no logger of their own. -->
+    <virtualType name="Commerce\Foundation\Logger\Handler" type="Commerce\Logger\Handler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">foundation.log</argument>
+            <argument name="subDirectory" xsi:type="string">commerce</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Commerce\Foundation\Logger" type="Commerce\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">commerce_foundation</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Commerce\Foundation\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+</config>
