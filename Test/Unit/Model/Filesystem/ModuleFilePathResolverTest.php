@@ -16,8 +16,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The one behaviour that matters here is what happens when the module is not
- * registered.
+ * What the resolver does when the module is not registered.
  */
 class ModuleFilePathResolverTest extends TestCase
 {

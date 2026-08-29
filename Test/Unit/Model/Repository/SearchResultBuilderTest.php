@@ -18,7 +18,7 @@ use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Most of this class is one line of ordering, and that line is the whole point.
+ * The total is read before the items are loaded.
  */
 class SearchResultBuilderTest extends TestCase
 {

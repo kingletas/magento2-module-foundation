@@ -15,8 +15,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 
 /**
- * The registry's whole job is to be boring, and the two ways it stops being
- * boring are both about `null`.
+ * A stored null is a value, and setting a key twice is a collision either way.
  */
 class RegistryTest extends TestCase
 {

@@ -22,8 +22,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Three things are being pinned down here, and none of them is "it returns a
- * parent SKU".
+ * One query per batch, a cached negative that stays a negative, and a
+ * deterministic winner where a child has more than one parent.
  */
 class ConfigurableParentSkuResolverTest extends TestCase
 {
@@ -84,7 +84,7 @@ class ConfigurableParentSkuResolverTest extends TestCase
     }
 
     /**
-     * The reason this class exists. Whatever the batch size, it is one query.
+     * Whatever the batch size, it is one query.
      */
     public function testAWholeBatchCostsOneQuery(): void
     {
