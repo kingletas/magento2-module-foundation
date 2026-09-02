@@ -274,7 +274,6 @@ class ConfigurableParentSkuResolverTest extends TestCase
         return $cache;
     }
 
-
     private function newSelect(): Select
     {
         $select = $this->createMock(Select::class);

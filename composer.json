@@ -3,6 +3,16 @@
     "description": "Shared building blocks for Commerce Magento 2 modules: tokens, registry, cache keys, search-result assembly, scoped config, declarative admin UI controls.",
     "type": "magento2-module",
     "license": "OSL-3.0",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/kingletas/magento2-module-logger"
+        }
+    ],
     "require": {
         "php": ">=8.4",
         "commerce/module-logger": "^2.0",

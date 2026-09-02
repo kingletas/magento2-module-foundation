@@ -47,6 +47,8 @@ class RedirectButton implements ButtonProviderInterface
      * di.xml argument with translate="true" to have it translated there.
      *
      * @inheritDoc
+     *
+     * @return array<string, mixed>
      */
     public function getButtonData(): array
     {

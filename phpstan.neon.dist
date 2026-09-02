@@ -12,6 +12,13 @@ parameters:
         - Test/*
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
-        # Magento's models expose their columns through __call, so every
-        # getter on a core model is invisible to static analysis.
-        - '#Call to an undefined method Magento\\[A-Za-z\\]+::(get|set|has)[A-Za-z]+\(\)#'
+        # Image::init() takes an untyped $product and documents it as the
+        # concrete Product; a repository hands back the interface.
+        -
+            message: '#Parameter \#1 \$product of method Magento\\Catalog\\Helper\\Image::init\(\) expects Magento\\Catalog\\Model\\Product#'
+            path: Model/Catalog/ProductImageUrlResolver.php
+        # Collection::getItems() documents DataObject[] and setItems() wants
+        # ExtensibleDataInterface[]; every core repository bridges the two.
+        -
+            message: '#Parameter \#1 \$items of method Magento\\Framework\\Api\\SearchResultsInterface::setItems\(\) expects#'
+            path: Model/Repository/SearchResultBuilder.php
