@@ -21,8 +21,12 @@ parameters:
         -
             message: '#Parameter \#1 \$product of method Magento\\Catalog\\Helper\\Image::init\(\) expects Magento\\Catalog\\Model\\Product#'
             path: Model/Catalog/ProductImageUrlResolver.php
+            # The framework's docblock varies across the versions this package supports.
+            reportUnmatched: false
         # Collection::getItems() documents DataObject[] and setItems() wants
         # ExtensibleDataInterface[]; every core repository bridges the two.
         -
             message: '#Parameter \#1 \$items of method Magento\\Framework\\Api\\SearchResultsInterface::setItems\(\) expects#'
             path: Model/Repository/SearchResultBuilder.php
+            # The framework's docblock varies across the versions this package supports.
+            reportUnmatched: false
