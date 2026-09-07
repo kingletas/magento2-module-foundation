@@ -2,7 +2,7 @@
 
 The shared base the other modules in this repository build on. It exists so that each module can be installed on its own without dragging in a 400-class "stdlib" grab-bag, and so that the pieces every module genuinely shares — tokens, cache keys, scoped config — have exactly one implementation.
 
-Everything here is either an interface with a swappable default, or a class whose behaviour is driven entirely from `di.xml`. There is nothing store-specific in it.
+Everything here is either an interface with a swappable default, or a class whose behaviour is driven entirely from `di.xml`. There's nothing store-specific in it.
 
 ---
 
@@ -27,7 +27,7 @@ Everything here is either an interface with a swappable default, or a class whos
 
 ### `ModuleConfig` — rebrandable config access
 
-The section id is a constructor argument, not a constant. That is what lets the same code serve `acme_embroidery/...` and `contoso_embroidery/...`:
+The section id is a constructor argument, not a constant. That's what lets the same code serve `acme_embroidery/...` and `contoso_embroidery/...`:
 
 ```xml
 <virtualType name="Acme\Embroidery\Model\Config" type="Commerce\Foundation\Model\Config\ModuleConfig">
@@ -54,7 +54,7 @@ public function getList(SearchCriteriaInterface $criteria): SearchResultsInterfa
 }
 ```
 
-That is the whole implementation. It delegates filter, sort and paging translation to core's `CollectionProcessorInterface`, which handles `like` escaping, `in`/`nin` arrays and null comparisons correctly.
+That's the whole implementation. It delegates filter, sort and paging translation to core's `CollectionProcessorInterface`, which handles `like` escaping, `in`/`nin` arrays and null comparisons correctly.
 
 **If your `getList()` declares its own `*SearchResultsInterface`, pass the result in.**
 
@@ -71,7 +71,7 @@ public function getList(SearchCriteriaInterface $criteria): SharedCartSearchResu
 
 Without the third argument the builder creates the result through
 `SearchResultsInterfaceFactory`, which produces whatever `SearchResultsInterface`
-is preferred to globally — Magento's generic `SearchResults`. That does not
+is preferred to globally — Magento's generic `SearchResults`. That doesn't
 implement your module's sub-interface, so the return is a `TypeError` on every
 call.
 
@@ -87,7 +87,7 @@ its factory's output in here.
 ## Gotchas
 
 - **`CacheKeyBuilderInterface` deliberately has no global `<preference>`.** Every consumer declares its own `virtualType` with its own prefix. Binding one implementation globally gives two unrelated features the same key namespace, and they will collide.
-- **Typing a constant on an interface is a breaking change for implementors.** Constant types are invariant, and an untyped constant in a class implementing a typed interface constant is a fatal. Before typing one here, grep every implementor — including ones in other repositories that this repo's diff will not show you.
+- **Typing a constant on an interface is a breaking change for implementors.** Constant types are invariant, and an untyped constant in a class implementing a typed interface constant is a fatal. Before typing one here, grep every implementor — including ones in other repositories that this repo's diff won't show you.
 - **`AbstractColumnMigrator` chunks on a numeric primary key.** A table keyed on a string will loop wrongly. It also copies values in the database and never through PHP, which is deliberate: marshalling them through a cast is how a migration zeroes every varchar and decimal column it touches.
 - **`Registry` is request-scoped and deliberately unglamorous.** It exists because Magento's own registry is deprecated and modules still need the seam, not because global mutable state is a good idea.
 
