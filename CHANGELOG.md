@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.0.0
+
 The vendor is now Kingletas: the package is `kingletas/module-foundation`, the namespace
 `Kingletas\Foundation` and the module `Kingletas_Foundation`, and every config
 section, table, console command and queue name starts with `kingletas`
