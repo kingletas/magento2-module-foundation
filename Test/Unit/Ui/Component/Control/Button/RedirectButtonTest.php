@@ -1,15 +1,15 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Unit\Ui\Component\Control\Button;
+namespace Kingletas\Foundation\Test\Unit\Ui\Component\Control\Button;
 
-use Commerce\Foundation\Ui\Component\Control\Button\RedirectButton;
+use Kingletas\Foundation\Ui\Component\Control\Button\RedirectButton;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\UrlInterface;
@@ -43,10 +43,10 @@ class RedirectButtonTest extends TestCase
     {
         $this->urlBuilder->expects($this->once())
             ->method('getUrl')
-            ->with('commerce_share/cart/index', [])
-            ->willReturn('https://admin.test/commerce_share/cart/');
+            ->with('kingletas_share/cart/index', [])
+            ->willReturn('https://admin.test/kingletas_share/cart/');
 
-        $this->button(['route' => 'commerce_share', 'controller' => 'cart', 'action' => 'index'])
+        $this->button(['route' => 'kingletas_share', 'controller' => 'cart', 'action' => 'index'])
             ->getButtonData();
     }
 

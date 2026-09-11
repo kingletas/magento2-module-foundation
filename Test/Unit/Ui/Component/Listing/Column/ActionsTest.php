@@ -1,15 +1,15 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Unit\Ui\Component\Listing\Column;
+namespace Kingletas\Foundation\Test\Unit\Ui\Component\Listing\Column;
 
-use Commerce\Foundation\Ui\Component\Listing\Column\Actions;
+use Kingletas\Foundation\Ui\Component\Listing\Column\Actions;
 use Magento\Framework\Escaper;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
@@ -40,16 +40,16 @@ class ActionsTest extends TestCase
     public function testEachConfiguredRouteBecomesAnAction(): void
     {
         $column = $this->column([
-            'viewUrlPath' => 'commerce/alert/view',
-            'editUrlPath' => 'commerce/alert/edit',
-            'deleteUrlPath' => 'commerce/alert/delete',
+            'viewUrlPath' => 'kingletas/alert/view',
+            'editUrlPath' => 'kingletas/alert/edit',
+            'deleteUrlPath' => 'kingletas/alert/delete',
         ]);
 
         $actions = $this->firstItem($column, [['entity_id' => 42]])['actions'];
 
         $this->assertSame(['view', 'edit', 'delete'], array_keys($actions));
-        $this->assertSame('https://admin.test/commerce/alert/view/entity_id=42', $actions['view']['href']);
-        $this->assertSame('https://admin.test/commerce/alert/edit/entity_id=42', $actions['edit']['href']);
+        $this->assertSame('https://admin.test/kingletas/alert/view/entity_id=42', $actions['view']['href']);
+        $this->assertSame('https://admin.test/kingletas/alert/edit/entity_id=42', $actions['edit']['href']);
         $this->assertSame('View', (string) $actions['view']['label']);
         $this->assertFalse($actions['view']['hidden']);
     }
@@ -60,7 +60,7 @@ class ActionsTest extends TestCase
      */
     public function testOnlyTheConfiguredRoutesAreRendered(): void
     {
-        $column = $this->column(['viewUrlPath' => 'commerce/alert/view']);
+        $column = $this->column(['viewUrlPath' => 'kingletas/alert/view']);
 
         $this->assertSame(['view'], array_keys($this->firstItem($column, [['entity_id' => 42]])['actions']));
     }
@@ -78,11 +78,11 @@ class ActionsTest extends TestCase
 
     public function testTheIdFieldDefaultsToEntityIdAndIsConfigurable(): void
     {
-        $column = $this->column(['indexField' => 'alert_id', 'viewUrlPath' => 'commerce/alert/view']);
+        $column = $this->column(['indexField' => 'alert_id', 'viewUrlPath' => 'kingletas/alert/view']);
 
         $actions = $this->firstItem($column, [['alert_id' => 7]])['actions'];
 
-        $this->assertSame('https://admin.test/commerce/alert/view/alert_id=7', $actions['view']['href']);
+        $this->assertSame('https://admin.test/kingletas/alert/view/alert_id=7', $actions['view']['href']);
     }
 
     /**
@@ -91,11 +91,11 @@ class ActionsTest extends TestCase
      */
     public function testTheConstructorDefaultIdFieldIsUsedWhenTheXmlIsSilent(): void
     {
-        $column = $this->column(['viewUrlPath' => 'commerce/alert/view'], 'alert_id');
+        $column = $this->column(['viewUrlPath' => 'kingletas/alert/view'], 'alert_id');
 
         $actions = $this->firstItem($column, [['alert_id' => 7]])['actions'];
 
-        $this->assertSame('https://admin.test/commerce/alert/view/alert_id=7', $actions['view']['href']);
+        $this->assertSame('https://admin.test/kingletas/alert/view/alert_id=7', $actions['view']['href']);
     }
 
     /**
@@ -107,12 +107,12 @@ class ActionsTest extends TestCase
         $column = $this->column([
             'indexField' => 'alert_id',
             'entityParam' => 'id',
-            'viewUrlPath' => 'commerce/alert/view',
+            'viewUrlPath' => 'kingletas/alert/view',
         ]);
 
         $actions = $this->firstItem($column, [['alert_id' => 7]])['actions'];
 
-        $this->assertSame('https://admin.test/commerce/alert/view/id=7', $actions['view']['href']);
+        $this->assertSame('https://admin.test/kingletas/alert/view/id=7', $actions['view']['href']);
     }
 
     /**
@@ -121,7 +121,7 @@ class ActionsTest extends TestCase
      */
     public function testARowMissingTheIdFieldIsSkipped(): void
     {
-        $column = $this->column(['viewUrlPath' => 'commerce/alert/view']);
+        $column = $this->column(['viewUrlPath' => 'kingletas/alert/view']);
 
         $items = $this->prepare($column, [['other' => 1], ['entity_id' => 42]])['data']['items'];
 
@@ -135,7 +135,7 @@ class ActionsTest extends TestCase
      */
     public function testDeleteCarriesAConfirmationNamingTheRecord(): void
     {
-        $column = $this->column(['deleteUrlPath' => 'commerce/alert/delete']);
+        $column = $this->column(['deleteUrlPath' => 'kingletas/alert/delete']);
 
         $delete = $this->firstItem($column, [['entity_id' => 42]])['actions']['delete'];
 
@@ -149,7 +149,7 @@ class ActionsTest extends TestCase
      */
     public function testTheIdInTheConfirmationIsEscaped(): void
     {
-        $column = $this->column(['deleteUrlPath' => 'commerce/alert/delete']);
+        $column = $this->column(['deleteUrlPath' => 'kingletas/alert/delete']);
 
         $delete = $this->firstItem($column, [['entity_id' => '<img src=x onerror=alert(1)>']])['actions']['delete'];
 
@@ -158,7 +158,7 @@ class ActionsTest extends TestCase
 
     public function testADataSourceWithoutItemsIsReturnedUnchanged(): void
     {
-        $column = $this->column(['viewUrlPath' => 'commerce/alert/view']);
+        $column = $this->column(['viewUrlPath' => 'kingletas/alert/view']);
 
         $this->assertSame([], $column->prepareDataSource([]));
         $this->assertSame(

@@ -1,17 +1,17 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Behaviour;
+namespace Kingletas\Foundation\Test\Behaviour;
 
-use Commerce\Foundation\Model\Cache\CacheKeyBuilder;
-use Commerce\Foundation\Model\Registry;
-use Commerce\Foundation\Model\Security\TokenGenerator;
+use Kingletas\Foundation\Model\Cache\CacheKeyBuilder;
+use Kingletas\Foundation\Model\Registry;
+use Kingletas\Foundation\Model\Security\TokenGenerator;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +32,7 @@ class IssuedLinkTest extends TestCase
     protected function setUp(): void
     {
         $this->tokens = new TokenGenerator();
-        $this->keys = new CacheKeyBuilder(new Json(), 'commerce_sharecart', ['COMMERCE_SHARED_CART'], 3600);
+        $this->keys = new CacheKeyBuilder(new Json(), 'kingletas_sharecart', ['KINGLETAS_SHARED_CART'], 3600);
         $this->cacheEntries = [];
         $this->cache = $this->cache();
         $this->registry = new Registry();

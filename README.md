@@ -1,4 +1,4 @@
-# Commerce_Foundation
+# Kingletas_Foundation
 
 The shared base the other modules in this repository build on. It exists so that each module can be installed on its own without dragging in a 400-class "stdlib" grab-bag, and so that the pieces every module genuinely shares — tokens, cache keys, scoped config — have exactly one implementation.
 
@@ -30,7 +30,7 @@ Everything here is either an interface with a swappable default, or a class whos
 The section id is a constructor argument, not a constant. That's what lets the same code serve `acme_embroidery/...` and `contoso_embroidery/...`:
 
 ```xml
-<virtualType name="Acme\Embroidery\Model\Config" type="Commerce\Foundation\Model\Config\ModuleConfig">
+<virtualType name="Acme\Embroidery\Model\Config" type="Kingletas\Foundation\Model\Config\ModuleConfig">
     <arguments>
         <argument name="section" xsi:type="string">acme_embroidery</argument>
     </arguments>

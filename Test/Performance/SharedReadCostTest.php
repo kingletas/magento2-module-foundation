@@ -1,20 +1,20 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Performance;
+namespace Kingletas\Foundation\Test\Performance;
 
-use Commerce\Foundation\Api\CacheKeyBuilderInterface;
-use Commerce\Foundation\Model\Cache\CacheKeyBuilder;
-use Commerce\Foundation\Model\Catalog\ConfigurableParentSkuResolver;
-use Commerce\Foundation\Model\Config\ModuleConfig;
-use Commerce\Foundation\Test\Support\BudgetAssertions;
-use Commerce\Foundation\Test\Support\CountingScopeConfig;
+use Kingletas\Foundation\Api\CacheKeyBuilderInterface;
+use Kingletas\Foundation\Model\Cache\CacheKeyBuilder;
+use Kingletas\Foundation\Model\Catalog\ConfigurableParentSkuResolver;
+use Kingletas\Foundation\Model\Config\ModuleConfig;
+use Kingletas\Foundation\Test\Support\BudgetAssertions;
+use Kingletas\Foundation\Test\Support\CountingScopeConfig;
 use Magento\Framework\App\CacheInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\ResourceConnection;
@@ -32,7 +32,7 @@ class SharedReadCostTest extends TestCase
 {
     use BudgetAssertions;
 
-    private const SECTION = 'commerce_example';
+    private const SECTION = 'kingletas_example';
 
     private int $queries = 0;
 
@@ -156,7 +156,7 @@ class SharedReadCostTest extends TestCase
             }
         );
 
-        $keys = new CacheKeyBuilder($serializer, 'commerce_example');
+        $keys = new CacheKeyBuilder($serializer, 'kingletas_example');
 
         for ($i = 0; $i < 200; $i++) {
             $keys->build(1, $i, 'TOKEN-' . $i, true, null);
@@ -182,7 +182,7 @@ class SharedReadCostTest extends TestCase
             }
         );
 
-        (new CacheKeyBuilder($serializer, 'commerce_example'))->build(1, ['a', 'b', 'c'], 'TOKEN');
+        (new CacheKeyBuilder($serializer, 'kingletas_example'))->build(1, ['a', 'b', 'c'], 'TOKEN');
 
         $this->assertSame(1, $serializations);
     }

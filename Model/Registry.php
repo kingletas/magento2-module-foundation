@@ -1,15 +1,15 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Model;
+namespace Kingletas\Foundation\Model;
 
-use Commerce\Foundation\Api\RegistryInterface;
+use Kingletas\Foundation\Api\RegistryInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 
 /**

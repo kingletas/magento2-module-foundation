@@ -1,6 +1,6 @@
 {
-    "name": "commerce/module-foundation",
-    "description": "Shared building blocks for Commerce Magento 2 modules: tokens, registry, cache keys, search-result assembly, scoped config, declarative admin UI controls.",
+    "name": "kingletas/module-foundation",
+    "description": "Shared building blocks for Kingletas Magento 2 modules: tokens, registry, cache keys, search-result assembly, scoped config, declarative admin UI controls.",
     "type": "magento2-module",
     "license": "OSL-3.0",
     "repositories": [
@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": ">=8.4",
-        "commerce/module-logger": "^2.0",
+        "kingletas/module-logger": "^2.0",
         "magento/framework": ">=103.0",
         "magento/module-catalog": ">=104.0",
         "magento/module-configurable-product": ">=100.4",
@@ -35,7 +35,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "Commerce\\Foundation\\": ""
+            "Kingletas\\Foundation\\": ""
         },
         "exclude-from-classmap": [
             "/Test/"

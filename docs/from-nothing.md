@@ -20,14 +20,14 @@ something real.
 
 ## What this is
 
-Shared building blocks for Commerce Magento 2 modules: tokens, registry, cache keys, search-result assembly, scoped config, declarative admin UI controls.
+Shared building blocks for Kingletas Magento 2 modules: tokens, registry, cache keys, search-result assembly, scoped config, declarative admin UI controls.
 
 Say what problem that solves, in the reader's own terms, before any mechanics.
 
 ## Step 1: install it
 
 ```bash
-composer require commerce/module-foundation
+composer require kingletas/module-foundation
 ```
 
 ## Step 2: point it at something

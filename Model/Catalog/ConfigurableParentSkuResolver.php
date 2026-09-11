@@ -1,16 +1,16 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Model\Catalog;
+namespace Kingletas\Foundation\Model\Catalog;
 
-use Commerce\Foundation\Api\CacheKeyBuilderInterface;
-use Commerce\Foundation\Api\ConfigurableParentSkuResolverInterface;
+use Kingletas\Foundation\Api\CacheKeyBuilderInterface;
+use Kingletas\Foundation\Api\ConfigurableParentSkuResolverInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\ResourceConnection;

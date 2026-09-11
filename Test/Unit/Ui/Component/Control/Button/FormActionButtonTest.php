@@ -1,15 +1,15 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Unit\Ui\Component\Control\Button;
+namespace Kingletas\Foundation\Test\Unit\Ui\Component\Control\Button;
 
-use Commerce\Foundation\Ui\Component\Control\Button\FormActionButton;
+use Kingletas\Foundation\Ui\Component\Control\Button\FormActionButton;
 use PHPUnit\Framework\TestCase;
 
 class FormActionButtonTest extends TestCase

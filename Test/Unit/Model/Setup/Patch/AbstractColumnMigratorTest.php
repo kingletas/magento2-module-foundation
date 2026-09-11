@@ -1,15 +1,15 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Unit\Model\Setup\Patch;
+namespace Kingletas\Foundation\Test\Unit\Model\Setup\Patch;
 
-use Commerce\Foundation\Model\Setup\Patch\AbstractColumnMigrator;
+use Kingletas\Foundation\Model\Setup\Patch\AbstractColumnMigrator;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;

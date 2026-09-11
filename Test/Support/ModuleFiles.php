@@ -1,13 +1,13 @@
 <?php
 /**
- * @package   Commerce_Foundation
- * @copyright Copyright (c) the Commerce modules authors
+ * @package   Kingletas_Foundation
+ * @copyright Copyright (c) the Kingletas modules authors
  * @license   OSL-3.0 https://opensource.org/licenses/OSL-3.0
  */
 
 declare(strict_types=1);
 
-namespace Commerce\Foundation\Test\Support;
+namespace Kingletas\Foundation\Test\Support;
 
 use DirectoryIterator;
 use RecursiveDirectoryIterator;
@@ -252,7 +252,7 @@ trait ModuleFiles
     }
 
     /**
-     * The module name in `etc/module.xml`, e.g. "Commerce_ShareCart".
+     * The module name in `etc/module.xml`, e.g. "Kingletas_ShareCart".
      */
     private function moduleName(string $moduleDir): string
     {
