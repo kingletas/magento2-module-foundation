@@ -6,6 +6,13 @@ Tooling only. Release notes join each changelog paragraph onto one line,
 because a release page turns every newline into a line break. Nothing about
 how the module behaves changed.
 
+Tooling only. The wiring check that asks for a `config.xml` default now follows
+nested `<group>` elements in `system.xml`, building the path from the whole
+chain of group ids the way Magento does. A field inside a nested group was
+invisible to it, so it reported nothing rather than reporting a missing
+default; no module here declares one today. Nothing about how the module
+behaves changed.
+
 ## 2.0.0
 
 The vendor is now Kingletas: the package is `kingletas/module-foundation`, the namespace

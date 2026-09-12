@@ -907,17 +907,35 @@ trait WiringAssertions
 
             foreach ($xml->system->section ?? [] as $section) {
                 foreach ($section->group ?? [] as $group) {
-                    foreach ($group->field ?? [] as $field) {
-                        $path = sprintf(
-                            '%s/%s/%s',
-                            (string) $section['id'],
-                            (string) $group['id'],
-                            (string) $field['id']
-                        );
-                        $paths[$path] = (string) ($field['type'] ?? '') === 'obscure'
-                            || str_contains((string) $field->backend_model, 'Backend\\Encrypted');
+                    foreach ($this->groupFieldPaths($group, (string) $section['id']) as $path => $isSecret) {
+                        $paths[$path] = $isSecret;
                     }
                 }
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Every field below one group, following nested groups to any depth, since
+     * Magento builds the path from the whole chain of group ids.
+     *
+     * @return array<string, bool> Full config path => is an encrypted secret.
+     */
+    private function groupFieldPaths(SimpleXMLElement $group, string $prefix): array
+    {
+        $prefix .= '/' . (string) $group['id'];
+        $paths = [];
+
+        foreach ($group->field ?? [] as $field) {
+            $paths[$prefix . '/' . (string) $field['id']] = (string) ($field['type'] ?? '') === 'obscure'
+                || str_contains((string) $field->backend_model, 'Backend\\Encrypted');
+        }
+
+        foreach ($group->group ?? [] as $nested) {
+            foreach ($this->groupFieldPaths($nested, $prefix) as $path => $isSecret) {
+                $paths[$path] = $isSecret;
             }
         }
 
@@ -940,16 +958,40 @@ trait WiringAssertions
 
             foreach ($xml->children() as $scope) {
                 foreach ($scope->children() as $section) {
-                    foreach ($section->children() as $group) {
-                        foreach ($group->children() as $field) {
-                            $paths[] = sprintf('%s/%s/%s', $section->getName(), $group->getName(), $field->getName());
-                        }
+                    foreach ($this->defaultValuePaths($section, '') as $path) {
+                        $paths[] = $path;
                     }
                 }
             }
         }
 
         return array_values(array_unique($paths));
+    }
+
+    /**
+     * Every value below one `config.xml` node, as a path from that node down;
+     * a node with no element children is the value itself.
+     *
+     * @return string[]
+     */
+    private function defaultValuePaths(SimpleXMLElement $node, string $prefix): array
+    {
+        $path = ($prefix === '' ? '' : $prefix . '/') . $node->getName();
+        $children = $node->children();
+
+        if ($children->count() === 0) {
+            return [$path];
+        }
+
+        $paths = [];
+
+        foreach ($children as $child) {
+            foreach ($this->defaultValuePaths($child, $path) as $leaf) {
+                $paths[] = $leaf;
+            }
+        }
+
+        return $paths;
     }
 
     /**
