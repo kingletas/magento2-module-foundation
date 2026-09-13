@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace Kingletas\Foundation\Test\Support;
 
+use Magento\Backend\Model\View\Result\PageFactory;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionNamedType;
 use SimpleXMLElement;
 
 /**
@@ -754,6 +756,256 @@ trait WiringAssertions
                     '%s is guarded by "%s", which this module\'s acl.xml does not declare',
                     $class,
                     $resource
+                );
+            }
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * Every method on the module's Config that reads a setting is called by
+     * something. A getter nothing calls is a control in the admin that does
+     * nothing when a merchant changes it.
+     */
+    public function assertEverySettingIsRead(string $moduleDir): void
+    {
+        $config = $moduleDir . '/Model/Config.php';
+        $source = is_file($config) ? (string) file_get_contents($config) : '';
+        $readers = $this->settingReaders($source);
+        $used = $readers === [] ? [] : $this->namesUsedIn($moduleDir, $config);
+        $problems = [];
+
+        foreach ($readers as $method => $setting) {
+            if (!isset($used[$method])) {
+                $problems[] = sprintf(
+                    '%s() reads "%s" and nothing calls it, so changing that setting in the '
+                    . 'admin does nothing',
+                    $method,
+                    $setting
+                );
+            }
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * Config method to the first setting path its body mentions.
+     *
+     * @return array<string, string>
+     */
+    private function settingReaders(string $source): array
+    {
+        $readers = [];
+
+        foreach (explode("\n    public function ", $source) as $index => $chunk) {
+            if ($index === 0) {
+                continue;
+            }
+
+            $name = (string) strtok($chunk, '(');
+            preg_match("/'([a-z0-9_]+\/[a-z0-9_]+)'/", $chunk, $setting);
+
+            if ($setting !== [] && !str_starts_with($name, '__')) {
+                $readers[$name] = $setting[1];
+            }
+        }
+
+        return $readers;
+    }
+
+    /**
+     * Every name the module refers to, including the ones di.xml passes as a
+     * string for a class to call dynamically.
+     *
+     * @return array<string, true>
+     */
+    private function namesUsedIn(string $moduleDir, string $except): array
+    {
+        $used = [];
+
+        foreach ($this->phpFiles($moduleDir) as $file) {
+            if ($file === $except) {
+                continue;
+            }
+
+            foreach ($this->nameMatches((string) file_get_contents($file)) as $name) {
+                $used[$name] = true;
+            }
+        }
+
+        foreach ($this->allEtcXml($moduleDir) as $file) {
+            $xml = (string) file_get_contents($file);
+
+            if (preg_match_all('/>(\w+)</', $xml, $matches) > 0) {
+                foreach ($matches[1] as $name) {
+                    $used[$name] = true;
+                }
+            }
+        }
+
+        foreach ((array) glob($moduleDir . '/view/*/templates/*.phtml') as $file) {
+            foreach ($this->nameMatches((string) file_get_contents((string) $file)) as $name) {
+                $used[$name] = true;
+            }
+        }
+
+        return $used;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function nameMatches(string $text): array
+    {
+        preg_match_all('/(?:->|::)\s*(\w+)\s*\(/', $text, $calls);
+        preg_match_all("/'(\w+)'/", $text, $strings);
+
+        return array_merge($calls[1], $strings[1]);
+    }
+
+    /**
+     * A layout file names a block class and a template. Neither is checked by
+     * anything until a person opens the page, and a page that will not render
+     * looks exactly like a page nobody has visited.
+     */
+    public function assertEveryLayoutNamesSomethingThatExists(string $moduleDir): void
+    {
+        $problems = [];
+
+        foreach ($this->layoutFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
+
+            if ($xml === null) {
+                $problems[] = sprintf('%s is not valid XML', basename($file));
+
+                continue;
+            }
+
+            foreach ($this->descendants($xml) as $element) {
+                if ($element->getName() !== 'block') {
+                    continue;
+                }
+
+                foreach ($this->blockProblems($element, basename($file), $moduleDir) as $problem) {
+                    $problems[] = $problem;
+                }
+            }
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function blockProblems(SimpleXMLElement $element, string $file, string $moduleDir): array
+    {
+        $problems = [];
+        $class = (string) ($element['class'] ?? '');
+        $template = (string) ($element['template'] ?? '');
+
+        if ($class !== '' && !class_exists($class) && !interface_exists($class)) {
+            $problems[] = sprintf('%s names the block %s, which does not exist', $file, $class);
+        }
+
+        if ($template === '' || !str_contains($template, '::')) {
+            return $problems;
+        }
+
+        [$module, $relative] = explode('::', $template, 2);
+        $owner = $module === $this->moduleNameOf($moduleDir)
+            ? $moduleDir
+            : dirname($moduleDir) . '/module-' . $this->directoryNameOf($module);
+
+        foreach (['adminhtml', 'frontend', 'base'] as $area) {
+            if (is_file($owner . '/view/' . $area . '/templates/' . $relative)) {
+                return $problems;
+            }
+        }
+
+        $problems[] = sprintf('%s names the template %s, which is not in %s', $file, $template, $owner);
+
+        return $problems;
+    }
+
+    /**
+     * `Kingletas_CardGuard` is the module in `module-card-guard`.
+     */
+    private function directoryNameOf(string $moduleName): string
+    {
+        $withoutVendor = substr($moduleName, (int) strpos($moduleName, '_') + 1);
+
+        return strtolower((string) preg_replace('/(?<!^)[A-Z]/', '-$0', $withoutVendor));
+    }
+
+    private function moduleNameOf(string $moduleDir): string
+    {
+        $xml = $this->loadXml($moduleDir . '/etc/module.xml');
+
+        return $xml === null ? '' : (string) ($xml->module['name'] ?? '');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function layoutFiles(string $moduleDir): array
+    {
+        $files = [];
+
+        foreach (['adminhtml', 'frontend', 'base'] as $area) {
+            $layout = $moduleDir . '/view/' . $area . '/layout';
+
+            if (!is_dir($layout)) {
+                continue;
+            }
+
+            foreach ((array) glob($layout . '/*.xml') as $file) {
+                $files[] = (string) $file;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * A result page only carries layout handles when the hand-written factory
+     * builds it, so a generated one leaves the page with no blocks at all.
+     */
+    public function assertNothingTakesTheGeneratedPageFactory(string $moduleDir): void
+    {
+        $problems = [];
+        [$prefix, $dir] = $this->psr4($moduleDir);
+
+        foreach ($this->sourceFiles($moduleDir) as $file) {
+            $relative = substr($file, strlen($dir) + 1, -strlen('.php'));
+            $class = $prefix . str_replace('/', '\\', $relative);
+
+            if (!class_exists($class)) {
+                continue;
+            }
+
+            $reflection = new ReflectionClass($class);
+            $constructor = $reflection->getConstructor();
+
+            if ($reflection->isAbstract() || $constructor === null) {
+                continue;
+            }
+
+            foreach ($constructor->getParameters() as $parameter) {
+                $type = $parameter->getType();
+
+                if (!$type instanceof ReflectionNamedType || $type->getName() !== PageFactory::class) {
+                    continue;
+                }
+
+                $problems[] = sprintf(
+                    '%s takes Magento\Backend\Model\View\Result\PageFactory, which is generated and never '
+                    . 'adds the default layout handle - the page renders with no menu and setActiveMenu() '
+                    . 'fails on false; take Magento\Framework\View\Result\PageFactory instead, which the '
+                    . 'adminhtml area already points at the backend page',
+                    $class
                 );
             }
         }

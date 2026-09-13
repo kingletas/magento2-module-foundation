@@ -20,7 +20,7 @@ use SimpleXMLElement;
 trait ModuleFiles
 {
     /**
-     * Every PHP file in the module that is not a test.
+     * Every PHP file in the module that is neither a test nor generated output.
      *
      * @return string[]
      */
@@ -29,7 +29,7 @@ trait ModuleFiles
         $files = [];
 
         foreach ($this->phpFiles($moduleDir) as $file) {
-            if (!str_contains($file, '/Test/')) {
+            if (!str_contains($file, '/Test/') && !str_contains($file, '/var/')) {
                 $files[] = $file;
             }
         }
