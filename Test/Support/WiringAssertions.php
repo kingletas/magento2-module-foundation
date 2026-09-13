@@ -1142,6 +1142,70 @@ trait WiringAssertions
     }
 
     /**
+     * Every default in config.xml is reachable: a field somebody can change, or
+     * a value something reads.
+     */
+    public function assertEveryDefaultIsUsed(string $moduleDir): void
+    {
+        $fields = $this->systemXmlPaths($moduleDir);
+        $named = $this->settingsNamedIn($moduleDir);
+        $problems = [];
+
+        foreach ($this->configXmlPaths($moduleDir) as $path) {
+            if (isset($fields[$path]) || $this->isReadBy($path, $named)) {
+                continue;
+            }
+
+            $problems[] = sprintf(
+                '%s is a default with no field and nothing reading it, so every store carries a '
+                . 'value that decides nothing. Remove it, or wire it up',
+                $path
+            );
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * @param string[] $named
+     */
+    private function isReadBy(string $path, array $named): bool
+    {
+        foreach ($named as $setting) {
+            if (str_ends_with($path, '/' . $setting)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Every "group/field" this module's code quotes, wherever it reads it from.
+     * A setting is read just as truly inline as through a named getter.
+     *
+     * @return string[]
+     */
+    private function settingsNamedIn(string $moduleDir): array
+    {
+        $named = [];
+
+        foreach ($this->phpFiles($moduleDir) as $file) {
+            preg_match_all(
+                "/'([a-z0-9_]+\/[a-z0-9_]+)'/",
+                (string) file_get_contents($file),
+                $matches
+            );
+
+            foreach ($matches[1] as $setting) {
+                $named[$setting] = true;
+            }
+        }
+
+        return array_keys($named);
+    }
+
+    /**
      * Every settable field, and whether it is a credential.
      *
      * @return array<string, bool> Full config path => is an encrypted secret.

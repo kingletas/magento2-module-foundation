@@ -94,6 +94,11 @@ abstract class ModuleWiringTestCase extends TestCase
         $this->assertEverySettingIsRead($this->moduleDir());
     }
 
+    public function testEveryDefaultIsUsed(): void
+    {
+        $this->assertEveryDefaultIsUsed($this->moduleDir());
+    }
+
     public function testEverySettingHasADefault(): void
     {
         $this->assertEverySettingHasADefault($this->moduleDir(), $this->settingsWithNoDefault());
