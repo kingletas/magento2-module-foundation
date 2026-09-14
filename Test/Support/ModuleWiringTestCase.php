@@ -64,6 +64,16 @@ abstract class ModuleWiringTestCase extends TestCase
         $this->assertEveryAdminControllerRequiresLogin($this->moduleDir());
     }
 
+    public function testEveryLayoutNamesSomethingThatExists(): void
+    {
+        $this->assertEveryLayoutNamesSomethingThatExists($this->moduleDir());
+    }
+
+    public function testNothingTakesTheGeneratedPageFactory(): void
+    {
+        $this->assertNothingTakesTheGeneratedPageFactory($this->moduleDir());
+    }
+
     public function testGridDataSourcesAreDeclaredGlobally(): void
     {
         $this->assertGridDataSourcesAreDeclaredGlobally($this->moduleDir());
@@ -77,6 +87,16 @@ abstract class ModuleWiringTestCase extends TestCase
     public function testEveryWebApiRouteIsServiceable(): void
     {
         $this->assertEveryWebApiRouteIsServiceable($this->moduleDir());
+    }
+
+    public function testEverySettingIsRead(): void
+    {
+        $this->assertEverySettingIsRead($this->moduleDir());
+    }
+
+    public function testEveryDefaultIsUsed(): void
+    {
+        $this->assertEveryDefaultIsUsed($this->moduleDir());
     }
 
     public function testEverySettingHasADefault(): void
