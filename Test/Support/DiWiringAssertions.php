@@ -71,6 +71,7 @@ trait DiWiringAssertions
     public function assertEveryPreferenceResolvesToAnImplementation(string $moduleDir): void
     {
         $problems = [];
+        $virtualTypes = $this->virtualTypes($moduleDir);
 
         foreach ($this->preferencePairs($moduleDir) as [$for, $type]) {
             if (!interface_exists($for) && !class_exists($for)) {
@@ -78,17 +79,39 @@ trait DiWiringAssertions
                 continue;
             }
 
-            if (!class_exists($type)) {
-                $problems[] = sprintf('%s is preferred to %s, which does not exist', $for, $type);
+            // A preference may name a virtual type, which resolves to the
+            // concrete class it extends.
+            $resolved = $this->concreteTypeOf($type, $virtualTypes);
+            $named = $resolved === $type ? $type : sprintf('%s (virtual type for %s)', $type, $resolved);
+
+            if (!class_exists($resolved)) {
+                $problems[] = sprintf('%s is preferred to %s, which does not exist', $for, $named);
                 continue;
             }
 
-            if (!is_subclass_of($type, $for) && $type !== $for) {
-                $problems[] = sprintf('%s does not implement %s', $type, $for);
+            if (!is_subclass_of($resolved, $for) && $resolved !== $for) {
+                $problems[] = sprintf('%s does not implement %s', $named, $for);
             }
         }
 
         $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * Follow a virtual type to the concrete class it ultimately extends.
+     *
+     * @param array<string, string> $virtualTypes Virtual type name => the type it extends.
+     */
+    private function concreteTypeOf(string $type, array $virtualTypes): string
+    {
+        $seen = [];
+
+        while (isset($virtualTypes[$type]) && !isset($seen[$type])) {
+            $seen[$type] = true;
+            $type = $virtualTypes[$type];
+        }
+
+        return $type;
     }
 
     /**

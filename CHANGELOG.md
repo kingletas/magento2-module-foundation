@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+Tooling only. `assertEveryPreferenceResolvesToAnImplementation()` follows a
+preference that names a virtual type through to the class it extends, instead of
+reporting the virtual type as a class that does not exist. Nothing about how the
+module behaves changed.
+
 Tooling only. `DiWiringAssertions` gains
 `assertEveryEncryptedFieldIsDeclaredSensitive()`, which reads every encrypted
 admin field out of `system.xml` and fails when its config path is not in the
