@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
 
 Tooling only. `assertEveryPreferenceResolvesToAnImplementation()` follows a
 preference that names a virtual type through to the class it extends, instead of
