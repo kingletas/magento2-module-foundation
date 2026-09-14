@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+Tooling only. `DiWiringAssertions` gains
+`assertEveryEncryptedFieldIsDeclaredSensitive()`, which reads every encrypted
+admin field out of `system.xml` and fails when its config path is not in the
+sensitive argument of `TypePool`. Nothing about how the module behaves changed.
+
 Tooling only. Release notes join each changelog paragraph onto one line,
 because a release page turns every newline into a line break. Nothing about
 how the module behaves changed.

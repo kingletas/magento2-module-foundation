@@ -286,6 +286,118 @@ trait DiWiringAssertions
     }
 
     /**
+     * Every encrypted admin field has its config path declared sensitive, so
+     * `app:config:dump` cannot export it and lock the field it came from.
+     *
+     * @param string $moduleDir Absolute path to the module root.
+     */
+    public function assertEveryEncryptedFieldIsDeclaredSensitive(string $moduleDir): void
+    {
+        $encrypted = $this->encryptedConfigPaths($moduleDir);
+
+        if ($encrypted === []) {
+            $this->addToAssertionCount(1);
+
+            return;
+        }
+
+        $declared = $this->sensitiveConfigPaths($moduleDir);
+        $missing = array_values(array_diff($encrypted, $declared));
+
+        $this->assertSame(
+            [],
+            $missing,
+            sprintf(
+                'Encrypted but not declared sensitive: %s. Add each to the sensitive argument of '
+                . 'Magento\\Config\\Model\\Config\\TypePool in di.xml.',
+                implode(', ', $missing)
+            )
+        );
+    }
+
+    /**
+     * Config paths whose admin field stores an encrypted value.
+     *
+     * @return string[]
+     */
+    private function encryptedConfigPaths(string $moduleDir): array
+    {
+        $paths = [];
+
+        foreach ($this->etcFiles($moduleDir, 'system.xml') as $file) {
+            $xml = $this->loadXml($file);
+
+            if ($xml === null) {
+                continue;
+            }
+
+            foreach ($xml->system->section ?? [] as $section) {
+                foreach ($section->group ?? [] as $group) {
+                    foreach ($group->field ?? [] as $field) {
+                        if (!$this->isEncryptedField($field)) {
+                            continue;
+                        }
+
+                        $paths[] = sprintf(
+                            '%s/%s/%s',
+                            (string) $section['id'],
+                            (string) $group['id'],
+                            (string) $field['id']
+                        );
+                    }
+                }
+            }
+        }
+
+        return array_values(array_unique($paths));
+    }
+
+    /**
+     * A field is encrypted when it says so, whichever way it was declared.
+     */
+    private function isEncryptedField(SimpleXMLElement $field): bool
+    {
+        return (string) $field['type'] === 'obscure'
+            || str_contains((string) ($field->backend_model ?? ''), 'Config\\Backend\\Encrypted');
+    }
+
+    /**
+     * Config paths this module declares sensitive.
+     *
+     * @return string[]
+     */
+    private function sensitiveConfigPaths(string $moduleDir): array
+    {
+        $paths = [];
+
+        foreach ($this->diFiles($moduleDir) as $file) {
+            $xml = $this->loadXml($file);
+
+            if ($xml === null) {
+                continue;
+            }
+
+            foreach ($xml->type ?? [] as $type) {
+                if ((string) $type['name'] !== 'Magento\\Config\\Model\\Config\\TypePool') {
+                    continue;
+                }
+
+                foreach ($type->arguments->argument ?? [] as $argument) {
+                    if ((string) $argument['name'] !== 'sensitive') {
+                        continue;
+                    }
+
+                    foreach ($argument->item ?? [] as $item) {
+                        $paths[] = (string) $item['name'];
+                    }
+                }
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
      * @return array<int, array{0: string, 1: string}>
      */
     private function preferencePairs(string $moduleDir): array
