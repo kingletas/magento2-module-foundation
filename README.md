@@ -17,6 +17,8 @@ Everything here is either an interface with a swappable default, or a class whos
 | `ConfigurableParentSkuResolverInterface` | `Model\Catalog\ConfigurableParentSkuResolver` | Simple SKU → configurable parent SKU, batched |
 | `ModuleFilePathResolverInterface` | `Model\Filesystem\ModuleFilePathResolver` | Paths inside your own module |
 | `MessageQueueEnvelopeInterface` | `Model\MessageQueue\Envelope` | Array-payload queue topics without a Data interface per topic |
+| `ClockInterface` | `Model\Clock\SystemClock` | The current time in UTC, swappable for `Test\Support\FakeClock` in tests |
+| — | `Model\Lock\LockRunner` | Work that must not run twice at once across servers, with the lock always released |
 | — | `Model\Repository\SearchResultBuilder` | `getList()` in any repository, using core's CollectionProcessor |
 | — | `Model\Config\ModuleConfig` | Typed, scope-aware reads of one config section |
 | — | `Ui\Component\...` | Grid action columns and admin buttons, declared not coded |

@@ -12,6 +12,8 @@
                 type="Kingletas\Foundation\Model\Catalog\ProductImageUrlResolver"/>
     <preference for="Kingletas\Foundation\Api\ConfigurableParentSkuResolverInterface"
                 type="Kingletas\Foundation\Model\Catalog\ConfigurableParentSkuResolver"/>
+    <preference for="Kingletas\Foundation\Api\ClockInterface"
+                type="Kingletas\Foundation\Model\Clock\SystemClock"/>
 
     <!--
         CacheKeyBuilderInterface is intentionally left without a global
