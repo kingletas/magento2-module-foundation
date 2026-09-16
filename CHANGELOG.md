@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.1
 
 Tooling only. The generated page factory check no longer loads `registration.php` a second time when it looks through a module's classes. In a standalone checkout the module root is also a Composer autoload root, so Composer has already registered the module, and loading the file again threw "has been already defined". The check now only loads files that declare a class. Nothing about how the module behaves changed.
 
