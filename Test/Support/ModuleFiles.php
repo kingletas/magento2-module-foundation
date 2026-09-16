@@ -38,6 +38,26 @@ trait ModuleFiles
     }
 
     /**
+     * Every source file that declares a class, so autoloading one never runs registration.php twice.
+     *
+     * @return string[]
+     */
+    private function classFiles(string $moduleDir): array
+    {
+        $files = [];
+
+        foreach ($this->sourceFiles($moduleDir) as $file) {
+            $source = (string) file_get_contents($file);
+
+            if (preg_match('/^\s*(?:(?:abstract|final|readonly)\s+)*class\s+\w+/m', $source) === 1) {
+                $files[] = $file;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
      * @return string[]
      */
     private function phpFiles(string $moduleDir): array

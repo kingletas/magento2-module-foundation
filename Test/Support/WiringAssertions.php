@@ -978,7 +978,7 @@ trait WiringAssertions
         $problems = [];
         [$prefix, $dir] = $this->psr4($moduleDir);
 
-        foreach ($this->sourceFiles($moduleDir) as $file) {
+        foreach ($this->classFiles($moduleDir) as $file) {
             $relative = substr($file, strlen($dir) + 1, -strlen('.php'));
             $class = $prefix . str_replace('/', '\\', $relative);
 
