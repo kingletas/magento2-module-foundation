@@ -361,7 +361,8 @@ trait DiWiringAssertions
                             continue;
                         }
 
-                        $paths[] = sprintf(
+                        $stored = trim((string) $field->config_path);
+                        $paths[] = $stored !== '' ? $stored : sprintf(
                             '%s/%s/%s',
                             (string) $section['id'],
                             (string) $group['id'],

@@ -1245,7 +1245,9 @@ trait WiringAssertions
         $paths = [];
 
         foreach ($group->field ?? [] as $field) {
-            $paths[$prefix . '/' . (string) $field['id']] = (string) ($field['type'] ?? '') === 'obscure'
+            $stored = trim((string) $field->config_path);
+            $path = $stored !== '' ? $stored : $prefix . '/' . (string) $field['id'];
+            $paths[$path] = (string) ($field['type'] ?? '') === 'obscure'
                 || str_contains((string) $field->backend_model, 'Backend\\Encrypted');
         }
 

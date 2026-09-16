@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Tooling only. The wiring assertions read a field's `config_path` where it has one, so a setting shown on one configuration screen and stored under another section is checked at the path it is stored. Nothing about how the module behaves changed.
+
 Adds `ClockInterface` with `SystemClock`, the current time in UTC, so modules stop carrying their own copy. Adds `LockRunner`, which runs work under a named lock shared by every server, releases it even when the work throws, and says whether the work ran. Tests get `FakeClock` and `ArrayCache` under `Test\Support`.
 
 ## 2.1.0
