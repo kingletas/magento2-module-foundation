@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.0
 
 Adds `ClockInterface` with `SystemClock`, the current time in UTC, so modules stop carrying their own copy. Adds `LockRunner`, which runs work under a named lock shared by every server, releases it even when the work throws, and says whether the work ran. Tests get `FakeClock` and `ArrayCache` under `Test\Support`.
 
