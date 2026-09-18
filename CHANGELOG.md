@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.3.0
 
 Tooling only. Three wiring assertions every module now gets. A menu item whose
 id ends in one of the ten names the admin theme has an icon rule for is
