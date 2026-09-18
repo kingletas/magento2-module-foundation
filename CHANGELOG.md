@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+Tooling only. Three wiring assertions every module now gets. A menu item whose
+id ends in one of the ten names the admin theme has an icon rule for is
+refused, because Magento builds the item's CSS class from that part of the id
+and the theme then draws its own icon beside it. A screen whose active menu
+names no menu item is refused, because it loses its place in the menu silently.
+And a module whose PHPMD or PHPStan settings leave out a directory it has is
+refused, because what is left out is never analysed and nothing says so.
+
 ## 2.2.1
 
 Tooling only. The generated page factory check no longer loads `registration.php` a second time when it looks through a module's classes. In a standalone checkout the module root is also a Composer autoload root, so Composer has already registered the module, and loading the file again threw "has been already defined". The check now only loads files that declare a class. Nothing about how the module behaves changed.
