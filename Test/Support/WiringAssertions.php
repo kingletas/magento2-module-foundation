@@ -675,7 +675,7 @@ trait WiringAssertions
                 $problems[] = sprintf(
                     '%s names %s, so Magento renders it as class item-%s and the admin theme draws '
                     . "Magento's own %s icon beside it. Give the item a name of its own; the ACL "
-                    . 'resource it points at can keep its.',
+                    . 'resource it points at can keep its own.',
                     $this->relative($moduleDir, $file),
                     $id,
                     $class,
@@ -685,6 +685,91 @@ trait WiringAssertions
         }
 
         $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * Every admin page's active menu names a menu item this module actually declares.
+     */
+    public function assertEveryActiveMenuNamesAMenuItem(string $moduleDir): void
+    {
+        $menuIds = $this->menuItemIds($moduleDir);
+        $module = $this->moduleNameOf($moduleDir);
+        $problems = [];
+
+        foreach ($this->sourceFiles($moduleDir) as $file) {
+            $contents = (string) file_get_contents($file);
+
+            foreach ($this->activeMenuIds($contents) as $id) {
+                // A page may point at a menu item a sibling module declares, and only this module is in front of us.
+                if (!str_starts_with($id, $module . '::') || in_array($id, $menuIds, true)) {
+                    continue;
+                }
+
+                $problems[] = sprintf(
+                    '%s makes its page active under %s, and no menu item has that id, so the screen '
+                    . 'loses its place in the menu without failing. The menu ids are: %s',
+                    $this->relative($moduleDir, $file),
+                    $id,
+                    $menuIds === [] ? 'none' : implode(', ', $menuIds)
+                );
+            }
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * The ids handed to `setActiveMenu()` or to the suite's admin page factory, resolving a constant in the same file.
+     *
+     * @return list<string>
+     */
+    private function activeMenuIds(string $contents): array
+    {
+        $ids = [];
+        $constants = [];
+
+        if (preg_match('/const\s+ACTIVE_MENU\s*=\s*\x27([^\x27]+)\x27/', $contents, $match) === 1) {
+            $constants['ACTIVE_MENU'] = $match[1];
+        }
+
+        if (preg_match('/const\s+ADMIN_RESOURCE\s*=\s*\x27([^\x27]+)\x27/', $contents, $match) === 1) {
+            $constants['ADMIN_RESOURCE'] = $match[1];
+        }
+
+        preg_match_all(
+            '/(?:setActiveMenu|pages->create)\(\s*(?:\x27([^\x27]+)\x27|self::([A-Z_]+))/',
+            $contents,
+            $calls,
+            PREG_SET_ORDER
+        );
+
+        foreach ($calls as $call) {
+            $id = $call[1] !== '' ? $call[1] : ($constants[$call[2] ?? ''] ?? '');
+
+            if ($id !== '') {
+                $ids[] = $id;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function menuItemIds(string $moduleDir): array
+    {
+        $ids = [];
+
+        foreach ($this->etcFiles($moduleDir, 'menu.xml') as $file) {
+            $xml = $this->loadXml($file);
+
+            foreach ($xml?->menu->add ?? [] as $item) {
+                $ids[] = (string) $item['id'];
+            }
+        }
+
+        return $ids;
     }
 
     /**
