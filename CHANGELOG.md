@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.1
+
+Tooling only. The check that every code directory is analysed no longer counts
+`vendor`, `node_modules` or `local.d` as the module's own code. A checkout that
+has run `composer install` has a `vendor/autoload.php`, which was enough to make
+the check demand that PHPStan and PHPMD be pointed at somebody else's code, so
+the check failed in every standalone clone and passed in the tree the modules
+are published from. That is the one place it could not be seen.
+
 ## 2.3.0
 
 Tooling only. Three wiring assertions every module now gets. A menu item whose
