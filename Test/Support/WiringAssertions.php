@@ -731,8 +731,14 @@ trait WiringAssertions
         foreach (glob($moduleDir . '/*', GLOB_ONLYDIR) ?: [] as $directory) {
             $name = basename($directory);
 
-            // Tests, view files, fixtures and packaging are not the module's own runtime code.
-            if (in_array($name, ['Test', 'docs', 'etc', 'i18n', 'packaging', 'var', 'view', 'theme'], true)) {
+            // Not the module's own runtime code: its tests, wiring and
+            // packaging, and whatever composer, a build or a developer left.
+            $notOurCode = [
+                'Test', 'docs', 'etc', 'i18n', 'local.d',
+                'node_modules', 'packaging', 'var', 'vendor', 'view', 'theme',
+            ];
+
+            if (in_array($name, $notOurCode, true)) {
                 continue;
             }
 
