@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2.2.1
+
+Tooling only. The generated page factory check no longer loads `registration.php` a second time when it looks through a module's classes. In a standalone checkout the module root is also a Composer autoload root, so Composer has already registered the module, and loading the file again threw "has been already defined". The check now only loads files that declare a class. Nothing about how the module behaves changed.
+
+## 2.2.0
 
 Tooling only. The wiring assertions read a field's `config_path` where it has one, so a setting shown on one configuration screen and stored under another section is checked at the path it is stored. Nothing about how the module behaves changed.
 
