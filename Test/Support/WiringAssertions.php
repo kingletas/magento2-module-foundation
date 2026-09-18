@@ -688,6 +688,111 @@ trait WiringAssertions
     }
 
     /**
+     * Every directory of this module's own code is named in the settings that decide what gets analysed.
+     */
+    public function assertEveryCodeDirectoryIsAnalysed(string $moduleDir): void
+    {
+        $problems = [];
+        $named = [
+            'composer.json scripts.md' => $this->phpmdDirectories($moduleDir),
+            'phpstan.neon.dist' => $this->phpstanDirectories($moduleDir),
+        ];
+
+        foreach ($named as $config => $directories) {
+            if ($directories === []) {
+                continue;
+            }
+
+            $missing = array_values(array_diff($this->codeDirectories($moduleDir), $directories));
+
+            if ($missing === []) {
+                continue;
+            }
+
+            $problems[] = sprintf(
+                '%s leaves out %s, so nothing analyses what is in there and nothing says so.',
+                $config,
+                implode(', ', $missing)
+            );
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * The top-level directories holding this module's own PHP, which is what an analyser has to be pointed at.
+     *
+     * @return list<string>
+     */
+    private function codeDirectories(string $moduleDir): array
+    {
+        $directories = [];
+
+        foreach (glob($moduleDir . '/*', GLOB_ONLYDIR) ?: [] as $directory) {
+            $name = basename($directory);
+
+            // Tests, view files, fixtures and packaging are not the module's own runtime code.
+            if (in_array($name, ['Test', 'docs', 'etc', 'i18n', 'packaging', 'var', 'view', 'theme'], true)) {
+                continue;
+            }
+
+            if (glob($directory . '/*.php') !== [] || glob($directory . '/*/*.php') !== []) {
+                $directories[] = $name;
+            }
+        }
+
+        sort($directories);
+
+        return $directories;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function phpmdDirectories(string $moduleDir): array
+    {
+        $manifest = json_decode((string) file_get_contents($moduleDir . '/composer.json'), true);
+        $arguments = explode(' ', (string) (($manifest['scripts']['md'] ?? '')));
+
+        return array_values(array_filter(explode(',', $arguments[1] ?? '')));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function phpstanDirectories(string $moduleDir): array
+    {
+        $file = $moduleDir . '/phpstan.neon.dist';
+
+        if (!is_file($file)) {
+            return [];
+        }
+
+        $directories = [];
+        $inPaths = false;
+
+        foreach (file($file, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+            if (preg_match('/^\s*paths:\s*$/', $line) === 1) {
+                $inPaths = true;
+
+                continue;
+            }
+
+            if (!$inPaths) {
+                continue;
+            }
+
+            if (preg_match('/^\s*-\s*(\S+)\s*$/', $line, $item) !== 1) {
+                break;
+            }
+
+            $directories[] = $item[1];
+        }
+
+        return $directories;
+    }
+
+    /**
      * Every admin page's active menu names a menu item this module actually declares.
      */
     public function assertEveryActiveMenuNamesAMenuItem(string $moduleDir): void

@@ -54,6 +54,11 @@ abstract class ModuleWiringTestCase extends TestCase
         $this->assertMessageQueueWiringAgrees($this->moduleDir());
     }
 
+    public function testEveryCodeDirectoryIsAnalysed(): void
+    {
+        $this->assertEveryCodeDirectoryIsAnalysed($this->moduleDir());
+    }
+
     public function testEveryActiveMenuNamesAMenuItem(): void
     {
         $this->assertEveryActiveMenuNamesAMenuItem($this->moduleDir());
