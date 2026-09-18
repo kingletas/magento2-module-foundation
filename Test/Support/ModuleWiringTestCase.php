@@ -54,6 +54,11 @@ abstract class ModuleWiringTestCase extends TestCase
         $this->assertMessageQueueWiringAgrees($this->moduleDir());
     }
 
+    public function testNoMenuItemBorrowsACoreMenuIcon(): void
+    {
+        $this->assertNoMenuItemBorrowsACoreMenuIcon($this->moduleDir());
+    }
+
     public function testTheConfigAclResourceHangsFromTheCoreChain(): void
     {
         $this->assertAclConfigResourceUsesTheCoreChain($this->moduleDir());

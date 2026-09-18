@@ -650,6 +650,65 @@ trait WiringAssertions
     }
 
     /**
+     * No admin menu item borrows a core menu icon through the CSS class Magento builds from its id.
+     */
+    public function assertNoMenuItemBorrowsACoreMenuIcon(string $moduleDir): void
+    {
+        $problems = [];
+
+        foreach ($this->etcFiles($moduleDir, 'menu.xml') as $file) {
+            $xml = $this->loadXml($file);
+
+            if ($xml === null) {
+                continue;
+            }
+
+            foreach ($xml->menu->add ?? [] as $item) {
+                $id = (string) $item['id'];
+                $name = substr($id, (int) strrpos($id, '::') + 2);
+                $class = str_replace('_', '-', strtolower($name));
+
+                if (!in_array($class, $this->coreMenuIconClasses(), true)) {
+                    continue;
+                }
+
+                $problems[] = sprintf(
+                    '%s names %s, so Magento renders it as class item-%s and the admin theme draws '
+                    . "Magento's own %s icon beside it. Give the item a name of its own; the ACL "
+                    . 'resource it points at can keep its.',
+                    $this->relative($moduleDir, $file),
+                    $id,
+                    $class,
+                    $class
+                );
+            }
+        }
+
+        $this->assertSame([], $problems, implode("\n  ", $problems));
+    }
+
+    /**
+     * The names the admin theme has an icon rule for, from `Magento_Backend/web/css/source/module/_menu.less`.
+     *
+     * @return list<string>
+     */
+    private function coreMenuIconClasses(): array
+    {
+        return [
+            'dashboard',
+            'sales',
+            'catalog',
+            'customer',
+            'marketing',
+            'content',
+            'report',
+            'stores',
+            'system',
+            'partners',
+        ];
+    }
+
+    /**
      * A config-section ACL resource hangs from the exact core chain.
      */
     public function assertAclConfigResourceUsesTheCoreChain(string $moduleDir): void
