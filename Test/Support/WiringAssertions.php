@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Kingletas\Foundation\Test\Support;
 
 use Magento\Backend\Model\View\Result\PageFactory;
+use Magento\Framework\Component\ComponentRegistrar;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -1172,7 +1173,7 @@ trait WiringAssertions
         [$module, $relative] = explode('::', $template, 2);
         $owner = $module === $this->moduleNameOf($moduleDir)
             ? $moduleDir
-            : dirname($moduleDir) . '/module-' . $this->directoryNameOf($module);
+            : $this->directoryOfModule($module, $moduleDir);
 
         foreach (['adminhtml', 'frontend', 'base'] as $area) {
             if (is_file($owner . '/view/' . $area . '/templates/' . $relative)) {
@@ -1183,6 +1184,15 @@ trait WiringAssertions
         $problems[] = sprintf('%s names the template %s, which is not in %s', $file, $template, $owner);
 
         return $problems;
+    }
+
+    /**
+     * Where Magento registered the module, which in a clone is under vendor/, or else the directory beside this one.
+     */
+    private function directoryOfModule(string $moduleName, string $besideDir): string
+    {
+        return (new ComponentRegistrar())->getPath(ComponentRegistrar::MODULE, $moduleName)
+            ?? dirname($besideDir) . '/module-' . $this->directoryNameOf($moduleName);
     }
 
     /**

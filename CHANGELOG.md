@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Tooling only. The layout check finds a template another module owns where
+Magento registered that module. It looked only in the directory beside the
+module being tested, which is where the modules sit in the tree they are
+published from, so in a standalone clone, where the other module is installed
+under `vendor/`, the check reported the template as missing.
+
 ## 2.3.1
 
 Tooling only. The check that every code directory is analysed no longer counts
