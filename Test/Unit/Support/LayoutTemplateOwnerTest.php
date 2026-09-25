@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Kingletas\Foundation\Test\Unit\Support;
 
 use Kingletas\Foundation\Test\Support\WiringAssertions;
-use Magento\Framework\Component\ComponentRegistrar;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 
@@ -22,6 +21,11 @@ class LayoutTemplateOwnerTest extends TestCase
     use WiringAssertions;
 
     private string $root = '';
+
+    /**
+     * @var array<string, string> What the registrar answers here, so no module is registered for the whole run.
+     */
+    private array $registered = [];
 
     protected function setUp(): void
     {
@@ -43,7 +47,7 @@ class LayoutTemplateOwnerTest extends TestCase
         $owner = 'Kingletas_Owner' . bin2hex(random_bytes(4));
         $ownerDir = $this->root . '/clone/vendor/kingletas/owner';
         $this->write($ownerDir . '/view/adminhtml/templates/element/confirm.phtml', '');
-        ComponentRegistrar::register(ComponentRegistrar::MODULE, $owner, $ownerDir);
+        $this->registered[$owner] = $ownerDir;
 
         $this->assertEveryLayoutNamesSomethingThatExists($this->moduleNaming($owner . '::element/confirm.phtml'));
     }
@@ -62,6 +66,11 @@ class LayoutTemplateOwnerTest extends TestCase
         }
 
         $this->fail('A template that no module has was not reported');
+    }
+
+    protected function registeredModuleDirectory(string $moduleName): ?string
+    {
+        return $this->registered[$moduleName] ?? null;
     }
 
     private function moduleNaming(string $template): string

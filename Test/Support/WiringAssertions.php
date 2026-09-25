@@ -1191,8 +1191,16 @@ trait WiringAssertions
      */
     private function directoryOfModule(string $moduleName, string $besideDir): string
     {
-        return (new ComponentRegistrar())->getPath(ComponentRegistrar::MODULE, $moduleName)
+        return $this->registeredModuleDirectory($moduleName)
             ?? dirname($besideDir) . '/module-' . $this->directoryNameOf($moduleName);
+    }
+
+    /**
+     * The directory a package's registration.php gave Magento for the module, if any.
+     */
+    protected function registeredModuleDirectory(string $moduleName): ?string
+    {
+        return (new ComponentRegistrar())->getPath(ComponentRegistrar::MODULE, $moduleName);
     }
 
     /**
