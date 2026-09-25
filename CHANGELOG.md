@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.3.2 - 2026-09-25
 
 Tooling only. The layout check finds a template another module owns where
 Magento registered that module. It looked only in the directory beside the
